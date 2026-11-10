@@ -265,7 +265,6 @@ const VIEW_LABELS = {
   '댓글닫기': 'Collapse', '댓글 등록': 'Add comment', '새로고침': 'Refresh', '전체글': 'All commits', '개념글': 'Starred',
   '글쓰기': 'Commit…', '목록': 'Log', '이전글': 'Prev', '다음글': 'Next',
 };
-const AVATAR_COLORS = ['#3d6b4f', '#4a5a8a', '#7a4a6d', '#8a6a3a', '#3a6a7a', '#7a3f3f', '#5a4a8a'];
 
 function relabel(root, map) {
   const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
@@ -281,15 +280,6 @@ function relabel(root, map) {
   }
 }
 
-function avatarFor(name) {
-  let h = 0;
-  for (const ch of name) h = (h * 31 + ch.codePointAt(0)) >>> 0;
-  const a = document.createElement('span');
-  a.className = 'ide-avatar';
-  a.textContent = (name.trim()[0] || '?').toUpperCase();
-  a.style.setProperty('--av', AVATAR_COLORS[h % AVATAR_COLORS.length]);
-  return a;
-}
 
 function disguiseComments() {
   const box = document.querySelector('.view_comment');
@@ -297,9 +287,6 @@ function disguiseComments() {
   box.querySelectorAll('.cmt_list li.ub-content, .reply_list li.ub-content').forEach((li) => {
     if (li.dataset.ide) return;
     li.dataset.ide = '1';
-    const nick = li.querySelector('.cmt_nickbox');
-    const name = li.querySelector('.gall_writer')?.dataset.nick || li.querySelector('.nickname')?.textContent || '?';
-    if (nick) nick.insertBefore(avatarFor(name), nick.firstChild);
     const dt = li.querySelector('.date_time');
     if (dt) dt.textContent = dt.textContent.replace(/^(\d\d)\.(\d\d) (\d\d:\d\d):\d\d$/, '$1/$2 $3');
   });
@@ -334,9 +321,6 @@ function disguiseView() {
   // Author / Date lines
   const writer = head.querySelector('.gall_writer');
   if (writer) {
-    const name = writer.dataset.nick || writer.querySelector('.nickname')?.textContent || '';
-    const fl = writer.querySelector('.fl');
-    if (fl) fl.insertBefore(avatarFor(name), fl.firstChild);
     const d = writer.querySelector('.gall_date');
     if (d) d.textContent = 'Date: ' + (d.getAttribute('title') || d.textContent).replace(/\./g, '-').replace(/:\d\d$/, '');
     // stats: 조회 183 / 추천 0 / 댓글 12 → +183  ★0  12 comments
@@ -472,9 +456,8 @@ function disguiseAccountBox() {
   head.innerHTML = '<span class="ide-account-title">GitLab</span><span class="ide-account-host">gitlab.workspace.dev</span>';
   box.insertBefore(head, box.firstChild);
   if (found) {
-    // keep the site's own nickname element (it opens the user menu); just prepend an avatar
+    // keep the site's own nickname element (it opens the user menu)
     found.el.classList.add('ide-nick-host');
-    found.el.insertBefore(avatarFor(found.nick), found.el.firstChild);
     box.classList.add('ide-logged-in');
   }
 }
@@ -527,12 +510,6 @@ function disguiseGallog() {
   wrap.dataset.ide = '1';
   const nickEl = document.querySelector('.galler_info .nick_name');
   const nick = nickEl ? nickEl.textContent.trim() : '';
-  const photo = document.querySelector('.top_bar .photo');
-  if (photo && nick) {
-    const a = avatarFor(nick);
-    a.classList.add('ide-avatar-lg');
-    photo.appendChild(a);
-  }
   const info = document.querySelector('.galler_info');
   if (info) {
     for (const n of info.childNodes) if (n.nodeType === 3 && /갤로그/.test(n.nodeValue)) n.nodeValue = '';
