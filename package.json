@@ -1,0 +1,14 @@
+{
+  "name": "workspace-ide",
+  "productName": "IntelliJ IDEA",
+  "version": "1.0.0",
+  "description": "IDE-skinned desktop client for gall.dcinside.com",
+  "main": "main.js",
+  "private": true,
+  "scripts": {
+    "start": "electron ."
+  },
+  "devDependencies": {
+    "electron": "^33.2.0"
+  }
+}

@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:">
+  <title>workspace – Main.java</title>
+  <link rel="stylesheet" href="ide.css">
+</head>
+<body>
+  <!-- Title bar (native min/max/close are drawn by titleBarOverlay on the right) -->
+  <header id="titlebar">
+    <div class="tb-left">
+      <span class="logo">IJ</span>
+      <span class="tb-item menu-ico">&#9776;</span>
+      <span class="tb-item project"><b class="proj-badge">WS</b> workspace <i>&#8964;</i></span>
+      <span class="tb-item vcs">&#5833; main <i>&#8964;</i></span>
+    </div>
+    <div class="tb-center">
+      <span class="tb-item run-cfg">&#9654;&#xFE0E; Application <i>&#8964;</i></span>
+      <button class="tb-btn" id="btn-back" title="Back (Alt+Left)">&#8592;</button>
+      <button class="tb-btn" id="btn-fwd" title="Forward (Alt+Right)">&#8594;</button>
+      <button class="tb-btn" id="btn-reload" title="Rebuild (Ctrl+F9)">&#10227;</button>
+      <button class="tb-btn run" id="btn-home" title="Run 'Application'">&#9654;&#xFE0E;</button>
+    </div>
+    <div class="tb-right">
+      <input id="addr" spellcheck="false" placeholder="URL or gallery id">
+      <button class="tb-btn" id="btn-search" title="Search Everywhere (Double Shift / Ctrl+N)">&#9906;&#xFE0E;</button>
+    </div>
+  </header>
+
+  <div id="main">
+    <!-- Left tool window stripe -->
+    <nav class="stripe left">
+      <button class="stripe-btn active" data-tw="project" title="Project (Alt+1)">&#128193;&#xFE0E;</button>
+      <button class="stripe-btn" data-tw="bookmarks" title="Bookmarks (Alt+2)">&#9733;&#xFE0E;</button>
+      <div class="grow"></div>
+      <button class="stripe-btn" id="btn-eventlog" title="Notifications">&#128276;&#xFE0E;<span id="notif-badge" hidden>0</span></button>
+      <button class="stripe-btn" id="btn-settings" title="Settings (Ctrl+Alt+S)">&#9881;&#xFE0E;</button>
+    </nav>
+
+    <!-- Project tool window -->
+    <aside id="toolwindow">
+      <div class="tw-head">
+        <span id="tw-title">Project</span>
+        <span class="tw-actions">
+          <button id="btn-add-gall" title="Add current gallery as module">+</button>
+          <button id="btn-collapse" title="Hide (Shift+Esc)">&#8722;</button>
+        </span>
+      </div>
+      <div class="tw-body" id="tree"></div>
+      <div class="tw-body" id="bookmarks" hidden></div>
+    </aside>
+    <div class="splitter" id="split-left"></div>
+
+    <!-- Editor area -->
+    <section id="editor">
+      <div id="tabs"></div>
+      <div id="breadcrumbs"></div>
+      <div id="views"></div>
+      <div id="boss" hidden>
+        <div class="gutter" id="boss-gutter"></div>
+        <pre class="code" id="boss-code"></pre>
+      </div>
+    </section>
+
+    <!-- Right stripe -->
+    <nav class="stripe right">
+      <button class="stripe-btn" title="Database">&#9636;&#xFE0E;</button>
+      <button class="stripe-btn" title="Gradle">&#120024;</button>
+    </nav>
+  </div>
+
+  <!-- Bottom tool window: Run / Notifications -->
+  <section id="bottom" hidden>
+    <div class="tw-head">
+      <span>Notifications</span>
+      <span class="tw-actions">
+        <button id="btn-clear-log" title="Clear all">&#8856;</button>
+        <button id="btn-hide-log" title="Hide">&#8722;</button>
+      </span>
+    </div>
+    <div id="eventlog"></div>
+  </section>
+
+  <footer id="statusbar">
+    <span id="sb-path">workspace</span>
+    <span class="grow"></span>
+    <span id="sb-loading" hidden>Indexing…</span>
+    <span>LF</span><span>UTF-8</span><span>4 spaces</span>
+    <span id="sb-boss" title="Ctrl+Shift+F12">&#9673;</span>
+  </footer>
+
+  <div id="balloons"></div>
+
+  <!-- Search Everywhere (gallery search) -->
+  <div id="se-backdrop" hidden>
+    <div id="se" role="dialog" aria-label="Search Everywhere">
+      <div class="se-tabs">
+        <span class="se-tab">All</span>
+        <span class="se-tab active">Classes</span>
+        <span class="se-tab">Files</span>
+        <span class="se-tab">Symbols</span>
+        <span class="se-tab">Actions</span>
+        <span class="se-grow"></span>
+        <label class="se-check"><input type="checkbox" id="se-all" checked> Include non-project items</label>
+      </div>
+      <div class="se-input">
+        <span class="se-icon">&#9906;&#xFE0E;</span>
+        <input id="se-q" spellcheck="false" autocomplete="off" placeholder="Type class name…">
+        <span id="se-spin" hidden>⟳</span>
+      </div>
+      <div id="se-list"></div>
+      <div class="se-foot">
+        <span><kbd>Enter</kbd> open</span>
+        <span><kbd>Ctrl</kbd>+<kbd>Enter</kbd> new tab</span>
+        <span><kbd>Alt</kbd>+<kbd>Enter</kbd> add to modules</span>
+        <span class="se-grow"></span>
+        <span id="se-count"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Settings dialog -->
+  <dialog id="settings">
+    <form method="dialog">
+      <h3>Settings</h3>
+      <label><input type="checkbox" id="opt-dim"> Dim images &amp; videos until hover</label>
+      <label><input type="checkbox" id="opt-blur-boss"> Switch to code view when window loses focus</label>
+      <label><input type="checkbox" id="opt-native"> Windows toast for notifications (disguised as build messages)</label>
+      <label><input type="checkbox" id="opt-mute"> Mute page audio</label>
+      <p class="hint">Boss key: <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>F12</kbd> (works globally) &nbsp;·&nbsp; <kbd>Esc</kbd> twice in-app</p>
+      <menu><button value="ok">OK</button></menu>
+    </form>
+  </dialog>
+
+  <script src="fake-code.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

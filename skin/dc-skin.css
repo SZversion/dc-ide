@@ -1,0 +1,594 @@
+/* ====================================================================
+   IDE (Darcula / New UI dark) skin for gall.dcinside.com PC pages.
+   Strategy: neutralise every background/colour broadly, then re-add
+   syntax-highlight colours for the parts that matter. Images keep working
+   because only background-COLOR is overridden, not background-image.
+   ==================================================================== */
+
+html, body { background: #1e1f22 !important; color: #bcbec4 !important; }
+
+*, *::before, *::after { text-shadow: none !important; box-shadow: none !important; }
+/* monospace everywhere except icon-font glyphs (editor toolbar etc.) */
+body, div, span:not([class*="icon"]), a, p, td, th, li, b, strong, em:not([class*="icon"]),
+h1, h2, h3, h4, label, input, textarea, select, button {
+  font-family: "JetBrains Mono", "D2Coding", Consolas, "Malgun Gothic", monospace !important;
+}
+
+div, section, article, header, main, footer, aside, nav, form, fieldset,
+table, thead, tbody, tfoot, tr, td, th, ul, ol, li, dl, dt, dd,
+p, span, em, strong, b, i, h1, h2, h3, h4, h5, label, caption, blockquote {
+  background-color: transparent !important;
+  color: inherit !important;
+  border-color: #393b40 !important;
+}
+
+/* ---- links = identifiers / method calls ---- */
+a, a * { color: #bcbec4 !important; }
+a:hover, a:hover * { color: #56a8f5 !important; text-decoration: underline !important; }
+a:visited, a:visited * { color: #8c8f96 !important; }
+
+/* ---- form controls ---- */
+input, textarea, select, button, .btn, [class^="btn_"], [class*=" btn_"], [class^="bnt_"] {
+  background-color: #2b2d30 !important;
+  color: #dfe1e5 !important;
+  border: 1px solid #4e5157 !important;
+  border-radius: 4px !important;
+}
+input:focus, textarea:focus, select:focus { border-color: #3574f0 !important; outline: none !important; }
+.btn_blue, .btn_lightblue, button.btn_blue, .btn_svc { background-color: #3574f0 !important; color: #fff !important; border-color: #3574f0 !important; }
+input::placeholder, textarea::placeholder { color: #6f737a !important; }
+
+/* sprite icons in dc blue → muted */
+.sp_img, .icon_img, [class*="sp_"], em[class^="icon_"] { filter: grayscale(1) brightness(.85) !important; }
+
+/* ====================================================================
+   Hide branding, ads and noise
+   ==================================================================== */
+.dclogo, .logo_img, .logo_img2, .dchead h1,
+.dcfoot, footer.dcfoot, .gnb_bar, .issue_wrap,
+.rightbanner1, [class^="rightbanner"], .ad_bottom_list, #ad_bottom_list,
+[id^="ad_"], [class^="ad_"], [class*=" ad_"], [id^="dna_"], [class*="adrop"],
+iframe[src*="addc.dcinside"], iframe[src*="pstatic"], iframe[src*="doubleclick"], iframe[src*="kakao"],
+ins.adsbygoogle, .banner_box, .bnr_wrap, .dc_banner, .dcwrap_sky, .rtbAlarmPopup,
+.alarmPopup, #gaejukimg, .visit_bookmark .bnr, .power_link, .pwlink, .stickyunit,
+.minor_intro_box .intro_bg,
+.con_banner, .writing_banbox, .kakao_ad_area, [class*="_ad_area"], [id*="google_ads"],
+iframe[id^="criteo"], .gallview_contents iframe:not(.write_div iframe), .rcont_imgtxt_box.dcissue,
+#hdline_ban { display: none !important; }
+
+/* wide layout: drop the 1160px centring so it fills the editor pane */
+.dcwrap, .width1160, .wrap_inner, #container { width: auto !important; max-width: none !important; margin: 0 !important; }
+.wrap_inner { padding: 0 16px !important; }
+#container { display: flex !important; gap: 20px; align-items: flex-start; }
+#container::after { display: none !important; }
+.left_content { float: none !important; flex: 1 1 auto; min-width: 0; width: auto !important; }
+#container *, .left_content { max-width: 100% !important; }
+.writing_view_box { float: none !important; width: auto !important; }
+.left_content table { table-layout: auto !important; width: 100% !important; }
+.right_content { float: none !important; flex: 0 0 300px; width: 300px !important; opacity: .7; }
+.right_content:hover { opacity: 1; }
+@media (max-width: 1000px) { .right_content { display: none !important; } }
+
+/* site header + "recent visits" bar: the IDE title bar replaces them */
+.dcheader, header.dcheader, .visit_bookmark, #visit_history { display: none !important; }
+
+/* ====================================================================
+   Gallery list = IntelliJ "Git › Log" tool window
+   graph | commit message (title) (#comments) | author | date | hash
+   Text rewrites (hash, dates, tab labels) are done in webview-preload.js
+   ==================================================================== */
+.page_head { padding: 6px 0 !important; border-bottom: 1px solid #393b40 !important; }
+.page_head h2, .page_head h2 a { font: 600 13px "Segoe UI", system-ui, sans-serif !important; color: #dfe1e5 !important; }
+.page_head .gall_issuebox, .page_head .fr { display: none !important; }
+
+/* list uses the IDE's UI font, not monospace */
+table.gall_list, table.gall_list * { font-family: "Segoe UI", "Malgun Gothic", system-ui, sans-serif !important; }
+table.gall_list { border: 0 !important; margin-top: 0 !important; }
+table.gall_list colgroup, table.gall_list thead { display: none !important; }
+table.gall_list tbody { display: block !important; }
+table.gall_list tbody tr {
+  display: flex !important; align-items: center; height: 26px; border: 0 !important;
+}
+table.gall_list tbody td {
+  border: 0 !important; padding: 0 8px !important; height: 26px; line-height: 26px !important;
+  font-size: 12.5px !important; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: left !important;
+}
+table.gall_list tbody tr:hover td { background-color: #2b2d30 !important; }
+table.gall_list tbody tr.crt td, table.gall_list tbody tr.ide-sel td { background-color: #2e436e !important; }
+
+/* rows that only exist on the community (notice / AD / survey) */
+table.gall_list tbody tr.ide-pinned, table.gall_list tbody tr.ide-ad { display: none !important; }
+
+
+/* column order & widths */
+td.gall_subject { order: 1; flex: none; padding-right: 0 !important; }
+td.gall_tit     { order: 2; flex: 1 1 auto; min-width: 0; }
+td.gall_writer  { order: 3; flex: 0 0 150px; }
+td.gall_date    { order: 4; flex: 0 0 130px; }
+td.gall_num     { order: 5; flex: 0 0 76px; }
+td.gall_count, td.gall_recommend { display: none !important; }
+
+/* commit graph column (SVG drawn by webview-preload.js) */
+table.gall_list tbody td.ide-graph { order: 0; flex: 0 0 68px; padding: 0 !important; height: 26px; overflow: visible; background: transparent !important; }
+table.gall_list tbody td.ide-graph svg { display: block; }
+table.gall_list tbody td.gall_tit { padding-left: 4px !important; }
+
+/* commit message */
+td.gall_tit a, td.gall_tit a b { color: #dfe1e5 !important; font-weight: 400 !important; text-decoration: none !important; }
+td.gall_tit a:visited, td.gall_tit a:visited b { color: #8c8f96 !important; }
+td.gall_tit a:hover { text-decoration: underline !important; }
+td.gall_tit em.icon_img, td.gall_tit .icon_img { display: none !important; }
+td.gall_tit a.reply_numbox { margin-left: 6px; }
+td.gall_tit .reply_num { color: #56a8f5 !important; font-size: 12px !important; }
+/* image/video post = small ref label, like a tag */
+tr[data-type="icon_pic"] td.gall_tit a:first-child::after,
+tr[data-type="icon_movie"] td.gall_tit a:first-child::after {
+  content: "assets"; margin-left: 6px; padding: 0 5px; border-radius: 3px; font-size: 10.5px;
+  background: #3d3a2a; color: #e5c07b !important; vertical-align: 1px;
+}
+tr[data-type="icon_movie"] td.gall_tit a:first-child::after { content: "media"; }
+tr[data-type^="icon_recom"] td.gall_tit a:first-child::before {
+  content: "release"; margin-right: 6px; padding: 0 5px; border-radius: 3px; font-size: 10.5px;
+  background: #253a2c; color: #5fb865 !important; vertical-align: 1px;
+}
+
+/* 말머리 (subject head) → ref label */
+td.gall_subject, td.gall_subject * { color: #c77dbb !important; font-size: 10.5px !important; }
+td.gall_subject:not(:empty) { padding: 0 5px !important; margin-left: 2px; height: 17px; line-height: 17px !important; border-radius: 3px; background: #3a2d3d !important; }
+td.gall_subject:empty { display: none !important; }
+
+/* author / date / hash */
+table.gall_list td.gall_writer, table.gall_list td.gall_writer * { color: #9da0a8 !important; font-weight: 400 !important; text-align: left !important; }
+td.gall_writer .ip, td.gall_writer .writer_nikcon, td.gall_writer img { display: none !important; }
+td.gall_date { color: #9da0a8 !important; }
+td.gall_num { color: #6f737a !important; font-family: "JetBrains Mono", Consolas, monospace !important; font-size: 11.5px !important; }
+
+/* toolbar above the list (tabs, page size, write button) */
+.list_array_option { border-bottom: 1px solid #393b40 !important; padding: 2px 0 !important; }
+.list_array_option .array_tab button, .center_box button, .array_tab a {
+  background: transparent !important; border: 0 !important; color: #9da0a8 !important;
+  font: 12.5px "Segoe UI", system-ui, sans-serif !important; padding: 4px 10px !important; border-radius: 4px !important;
+}
+.array_tab .on, .array_tab button.on { color: #dfe1e5 !important; background: #393b40 !important; }
+.btn_write, a.btn_write { background: #3574f0 !important; color: #fff !important; border: 0 !important; border-radius: 4px !important; padding: 0 12px !important; font: 12.5px "Segoe UI", system-ui, sans-serif !important; }
+.btn_write::before, .btn_write em { display: none !important; }
+
+/* paging */
+.bottom_paging_box a, .bottom_paging_box em { color: #8c8f96 !important; border: 0 !important; }
+.bottom_paging_box em { color: #dfe1e5 !important; text-decoration: underline !important; }
+
+/* ====================================================================
+   Post view = "Commit details" panel + code review
+   Text rewrites (commit hash, Author/Date, labels, avatars) in webview-preload.js
+   ==================================================================== */
+.view_content_wrap, .gallview_head, .gallview_contents { border-color: #393b40 !important; }
+.gallview_head, .gallview_head *, .gallview_contents .writing_view_box ~ *,
+.view_comment, .view_comment *:not(.usertxt):not(.usertxt *), .btn_recommend_box * {
+  font-family: "Segoe UI", "Malgun Gothic", system-ui, sans-serif !important;
+}
+.gallview_head { padding: 10px 0 12px !important; border-bottom: 1px solid #393b40 !important; }
+.ide-commit-meta { font: 12px "JetBrains Mono", Consolas, monospace !important; color: #9da0a8; margin-bottom: 6px; }
+.ide-commit-meta .k { color: #cf8e6d; }
+.ide-commit-meta .h { color: #b3ae60; }
+.ide-commit-meta .ref { margin-left: 8px; padding: 0 6px; border-radius: 3px; background: #253a2c; color: #5fb865; font: 11px "Segoe UI", sans-serif; }
+.gallview_head h3.title { margin: 2px 0 8px !important; }
+.title_subject { color: #dfe1e5 !important; font-size: 17px !important; font-weight: 600 !important; }
+.title_headtext:not(:empty) { padding: 0 6px; border-radius: 3px; background: #3a2d3d !important; color: #c77dbb !important; font-size: 11px !important; margin-right: 6px; vertical-align: 2px; }
+.title_device, .gall_scrap, .gallview_head .writer_nikcon, .gallview_head .ip { display: none !important; }
+
+/* Author line */
+.gallview_head .gall_writer .fl { display: flex !important; align-items: center; gap: 8px; }
+.gallview_head .gall_writer .nickname, .gallview_head .gall_writer .nickname * { color: #dfe1e5 !important; font-weight: 600 !important; }
+.gallview_head .gall_writer .nickname::before { content: "Author: "; color: #9da0a8; font-weight: 400; }
+.gallview_head .gall_date { color: #9da0a8 !important; margin-left: 10px; }
+.gallview_head .gall_date::before, .gallview_head .gall_date::after { display: none !important; }
+.gallview_head .gall_comment, .gallview_head .gall_comment a { background: transparent !important; border: 0 !important; padding: 0 !important; }
+.gallview_head .fr span { color: #9da0a8 !important; border: 0 !important; }
+.gallview_head .fr span::before, .gallview_head .fr span::after { display: none !important; }
+.gallview_head .gall_count { color: #5fb865 !important; font-family: "JetBrains Mono", Consolas, monospace !important; }
+.gallview_head .gall_reply_num { color: #e5c07b !important; }
+.gallview_head .gall_comment a { color: #56a8f5 !important; }
+
+/* avatars (gallview head + comments) */
+span.ide-avatar {
+  background-color: var(--av, #4a5a8a) !important;
+  display: inline-grid !important; place-items: center; flex: none;
+  width: 22px; height: 22px; border-radius: 50%; margin-right: 6px;
+  color: #fff !important; font: 600 11px "Segoe UI", sans-serif !important; vertical-align: middle;
+}
+
+/* body = file panel */
+.writing_view_box {
+  border: 1px solid #393b40 !important; border-radius: 6px !important; margin: 14px 0 !important;
+  padding: 0 !important; overflow: hidden;
+}
+.writing_view_box::before {
+  content: "≡  CHANGELOG.md"; display: block; padding: 6px 12px; background: #2b2d30 !important;
+  border-bottom: 1px solid #393b40; color: #9da0a8; font: 12px "Segoe UI", sans-serif;
+}
+.write_div { padding: 14px 18px 18px 18px !important; border-left: 3px solid #2b2d30 !important; }
+.write_div, .write_div * { color: #bcbec4 !important; line-height: 1.75 !important; }
+.write_div a, .write_div a * { color: #56a8f5 !important; }
+
+/* 추천 / 비추천 → Approve / Request changes */
+.btn_recommend_box { margin: 16px 0 !important; padding: 0 !important; border: 0 !important; }
+.btn_recommend_box .inner_box { display: flex !important; gap: 8px; justify-content: flex-start !important; width: auto !important; padding: 0 !important; border: 0 !important; }
+.btn_recommend_box .inner { display: flex !important; align-items: center; gap: 0; width: auto !important; float: none !important; margin: 0 !important; }
+.btn_recommend_box .inner:first-child { flex-direction: row-reverse; }
+.btn_recommend_box .sup_num, .btn_recommend_box em.sp_img, .recom_bottom_box { display: none !important; }
+.btn_recom_up, .btn_recom_down {
+  position: static !important; width: auto !important; height: 28px !important; padding: 0 12px !important;
+  border: 1px solid #4e5157 !important; border-radius: 4px 0 0 4px !important; background: #2b2d30 !important; margin: 0 !important;
+}
+.btn_recom_up::before { content: "✓  Approve"; color: #5fb865; font: 12.5px "Segoe UI", sans-serif; }
+.btn_recom_down::before { content: "✗  Request changes"; color: #e06c75; font: 12.5px "Segoe UI", sans-serif; }
+.btn_recom_up:hover, .btn_recom_down:hover { background: #393b40 !important; }
+.up_num_box, .down_num_box {
+  position: static !important; width: auto !important; height: 28px !important; margin: 0 !important; padding: 0 10px !important;
+  display: flex !important; align-items: center; border: 1px solid #4e5157 !important; border-left: 0 !important;
+  border-radius: 0 4px 4px 0 !important; background: #1e1f22 !important;
+}
+.up_num, .down_num { font: 12px "JetBrains Mono", Consolas, monospace !important; color: #9da0a8 !important; margin: 0 !important; }
+
+/* comments = review thread */
+.view_comment .comment_count { border: 0 !important; padding: 8px 0 !important; }
+.view_comment .num_box { color: #dfe1e5 !important; font-weight: 600 !important; }
+.view_comment .num_box em, .view_comment .num_box em * { color: #56a8f5 !important; }
+.view_comment .num_box em::before { content: "("; } .view_comment .num_box em::after { content: ")"; }
+.view_comment .comment_sort label { color: #9da0a8 !important; font-weight: 400 !important; }
+.view_comment .icon_setreply, .view_comment .btn_setreply, .view_comment .checkmark { display: none !important; }
+.comment_box { border: 0 !important; }
+.cmt_list > li.ub-content, .reply_list li.ub-content {
+  border: 1px solid #393b40 !important; border-radius: 6px !important; margin: 0 0 8px !important; padding: 8px 12px !important;
+  background: #232427 !important;
+}
+.cmt_list > li:not(.ub-content) { border: 0 !important; padding: 0 !important; }
+.reply, .reply_box { border: 0 !important; padding: 0 !important; background: transparent !important; }
+.reply_list { margin-left: 26px !important; padding-left: 12px !important; border-left: 2px solid #393b40 !important; }
+.reply_list li.ub-content { background: #1e1f22 !important; }
+.cmt_info, .reply_info { display: flex !important; flex-wrap: wrap; align-items: flex-start; padding: 0 !important; border: 0 !important; }
+.cmt_info .addbox, .reply_info .addbox { flex: 1 1 auto; min-width: 0; float: none !important; width: auto !important; }
+.cmt_nickbox { display: flex !important; align-items: center; float: none !important; width: auto !important; margin-bottom: 2px; }
+.cmt_nickbox .nickname, .cmt_nickbox .nickname * { color: #dfe1e5 !important; font-weight: 600 !important; }
+.cmt_nickbox .ip, .cmt_nickbox .writer_nikcon, .cmt_nickbox img { display: none !important; }
+.cmt_txtbox { float: none !important; width: auto !important; padding-left: 28px !important; }
+.cmt_list .usertxt, .reply_list .usertxt { color: #bcbec4 !important; font-size: 13px !important; }
+.cmt_txtbox, .cmt_txtbox .usertxt { border: 0 !important; background: transparent !important; }
+.cmt_info .fr, .reply_info .fr { float: none !important; display: flex !important; gap: 10px; align-items: center; }
+.cmt_list .date_time, .reply_list .date_time { color: #6f737a !important; font-size: 11.5px !important; }
+.cmt_mdf_del button { background: transparent !important; border: 0 !important; color: #6f737a !important; font-size: 11.5px !important; padding: 0 !important; }
+.cmt_mdf_del button:hover { color: #e06c75 !important; }
+.cmt_list li.dory, .cmt_list .dory { display: none !important; }
+.comment_wrap .bottom_paging_box, .cmt_inner, .comment_count .fr { font-size: 12px !important; }
+.contgo, .btn_cmt_close, .btn_cmt_refresh, .cmtup { color: #9da0a8 !important; background: transparent !important; border: 0 !important; }
+
+/* review comment input */
+.cmt_write_box { border: 1px solid #393b40 !important; border-radius: 6px !important; padding: 10px !important; background: #232427 !important; margin-top: 10px !important; }
+.cmt_write_box, .cmt_txt_cont, .cmt_write { background-color: #232427 !important; }
+.cmt_textarea_label, .tip_box2, .tip_nomem_nick, .btn_dccon_guide { display: none !important; }
+.cmt_write textarea { background: #1e1f22 !important; min-height: 64px; font-size: 13px !important; }
+.cmt_write_box .btn_blue, .cmt_write_box .repley_add { background: #3574f0 !important; color: #fff !important; border: 0 !important; }
+.view_ad_wrap, .view_bottom_ad, .dcads, [data-dcads-anchor="pc_comment_native"] .cmt_ad { display: none !important; }
+
+/* ====================================================================
+   Write page
+   ==================================================================== */
+.write_infobox input, .write_subject input, #subject { font-size: 14px !important; }
+.note-editor, .note-editable, .note-toolbar, .note-statusbar, .note-editing-area { background-color: #1e1f22 !important; color: #bcbec4 !important; border-color: #393b40 !important; }
+.note-toolbar .btn, .note-btn { background-color: #2b2d30 !important; }
+iframe { color-scheme: dark; }
+
+
+/* scrollbars */
+::-webkit-scrollbar { width: 10px; height: 10px; background: #1e1f22; }
+::-webkit-scrollbar-thumb { background: #4e5157; border-radius: 5px; border: 2px solid #1e1f22; }
+::selection { background: #214283 !important; color: inherit !important; }
+
+/* git-log fixes */
+.page_head h2, .page_head h2 a { letter-spacing: normal !important; }
+.select_area a { white-space: nowrap !important; }
+.wrap_inner { overflow-x: hidden !important; }
+table.gall_list td.gall_writer .addbox, table.gall_list td.gall_writer > div { display: inline !important; }
+/* the site sets min-widths on its wrappers; make them follow the window */
+html, body, #top, .dcwrap, .wrap_inner, #container { min-width: 0 !important; max-width: 100% !important; }
+#container { width: 100% !important; }
+.left_content { flex: 1 1 0 !important; }
+/* right column: keep only the login box (login / my posts / alarms) */
+.right_content > div > *:not(#login_box), .right_content > article, .right_content > div > article { display: none !important; }
+.right_content { flex-basis: 240px !important; width: 240px !important; opacity: .85; }
+#login_box { border: 1px solid #393b40 !important; border-radius: 6px !important; }
+
+/* review input + bottom buttons: auto width, UI font, no dc icons */
+.cmt_write_box button, .view_bottom_btnbox button, .view_bottom_btnbox a, .list_bottom_btnbox button, .list_bottom_btnbox a {
+  width: auto !important; min-width: 0 !important; padding: 0 12px !important; white-space: nowrap !important;
+  font: 12.5px "Segoe UI", "Malgun Gothic", sans-serif !important; height: 28px !important; line-height: 26px !important;
+}
+.cmt_write_box em.sp_img, .view_bottom_btnbox em.sp_img { display: none !important; }
+.cmt_write_box button.btn_circledel { width: 16px !important; height: 16px !important; padding: 0 !important; border: 0 !important; background-color: transparent !important; line-height: 16px !important; }
+
+/* ====================================================================
+   Login page (sign.dcinside.com) = IDE "GitLab 계정 로그인" dialog
+   The dialog itself is built in webview-preload.js (disguiseLogin)
+   ==================================================================== */
+.login_wrap .dcheader, .login_wrap .ban_box, .login_wrap .dcfoot,
+.login_inputbox .chk_ip, .login_inputbox .logon_option, .login_inputbox .idip_checkbox:empty { display: none !important; }
+.login_wrap, .login_wrap #container, .login_wrap .content, .login_page, .login_inputbox, .login_inputbox .inner {
+  border: 0 !important; background: transparent !important;
+}
+.ide-dialog {
+  position: fixed !important; top: 42%; left: 50%; transform: translate(-50%, -50%); z-index: 1000;
+  width: 400px; max-width: calc(100vw - 32px);
+  background: #2b2d30 !important; border: 1px solid #4e5157 !important; border-radius: 8px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, .55) !important;
+  color: #dfe1e5 !important; text-align: left;
+}
+.ide-dialog, .ide-dialog * { font: 13px "Segoe UI", "Malgun Gothic", system-ui, sans-serif !important; letter-spacing: normal !important; }
+.ide-dlg-title { display: flex !important; align-items: center; gap: 8px; height: 38px; padding: 0 8px 0 12px; }
+.ide-dlg-title > span:nth-child(2) { color: #dfe1e5 !important; }
+span.ide-dlg-logo {
+  display: inline-grid !important; place-items: center; width: 18px; height: 18px; border-radius: 3px;
+  background-color: #000 !important; color: #fff !important; font: 700 8px "JetBrains Mono", Consolas, monospace !important;
+}
+.ide-dialog button.ide-dlg-x {
+  margin-left: auto; width: 28px !important; height: 28px !important; padding: 0 !important; border: 0 !important;
+  background: transparent !important; color: #9da0a8 !important; border-radius: 4px !important; font-size: 14px !important;
+}
+.ide-dialog button.ide-dlg-x:hover { background: #393b40 !important; }
+.ide-dlg-body { display: grid !important; grid-template-columns: max-content 1fr; gap: 10px 12px; align-items: center; padding: 14px 18px 8px; }
+.ide-dlg-label { color: #dfe1e5 !important; white-space: nowrap; }
+.ide-dlg-field { min-width: 0; }
+.ide-dlg-row { display: flex !important; gap: 8px; align-items: center; }
+.ide-dialog input[type="text"], .ide-dialog input[type="password"], .ide-dialog input.ide-dlg-server {
+  width: 100% !important; height: 30px !important; padding: 0 8px !important; margin: 0 !important;
+  background: #2b2d30 !important; background-image: none !important;
+  border: 1px solid #4e5157 !important; border-radius: 4px !important; color: #dfe1e5 !important; outline: none !important;
+}
+.ide-dialog input[type="text"]:focus, .ide-dialog input[type="password"]:focus { border-color: #3574f0 !important; box-shadow: 0 0 0 1px #3574f0 !important; }
+.ide-dialog input.ide-dlg-server { color: #6f737a !important; border-color: #43454a !important; }
+.ide-dlg-row input { flex: 1 1 auto; }
+.ide-dlg-hint { color: #8c8f96 !important; font-size: 12px !important; line-height: 1.4 !important; margin-top: -4px; }
+.ide-dialog .checkbox { display: flex !important; align-items: center; gap: 6px; position: static !important; }
+.ide-dialog .checkbox input { position: static !important; opacity: 1 !important; width: 14px !important; height: 14px !important; margin: 0 !important; appearance: auto !important; accent-color: #3574f0; }
+.ide-dialog .checkbox .checkmark { display: none !important; }
+.ide-dialog .checkbox label { color: #dfe1e5 !important; padding: 0 !important; }
+.ide-dialog .checkbox label::before, .ide-dialog .checkbox label::after { display: none !important; }
+.ide-dlg-footer { display: flex !important; justify-content: flex-end; gap: 10px; padding: 18px 18px 16px; }
+.ide-dialog button.ide-dlg-btn {
+  width: auto !important; min-width: 72px; height: 30px !important; padding: 0 14px !important; margin: 0 !important;
+  background: #2b2d30 !important; color: #dfe1e5 !important; border: 1px solid #5a5d63 !important; border-radius: 4px !important;
+  line-height: 28px !important; cursor: pointer;
+}
+.ide-dialog button.ide-dlg-btn:hover { background: #393b40 !important; }
+.ide-dialog button.ide-dlg-primary { background: #3574f0 !important; border-color: #3574f0 !important; color: #fff !important; font-weight: 600 !important; }
+.ide-dialog button.ide-dlg-primary:hover { background: #4682fa !important; }
+.ide-dialog button.ide-dlg-gen { flex: none; min-width: 0; }
+body .ide-dialog, body .ide-dialog * { font-family: "Segoe UI", "Malgun Gothic", system-ui, sans-serif !important; box-sizing: border-box !important; }
+body .ide-dialog .ide-dlg-logo { font-family: "JetBrains Mono", Consolas, monospace !important; }
+.ide-dialog .checkbox { margin: 0 !important; padding: 0 !important; float: none !important; }
+.ide-dialog button.ide-dlg-primary { font-weight: 400 !important; }
+
+/* ====================================================================
+   Right-side account box → "GitLab account" panel (webview-preload.js: disguiseAccountBox)
+   ==================================================================== */
+#login_box {
+  background: #2b2d30 !important; border: 1px solid #393b40 !important; border-radius: 6px !important;
+  padding: 10px 12px !important; height: auto !important; text-align: left !important;
+}
+#login_box, #login_box * { font-family: "Segoe UI", "Malgun Gothic", system-ui, sans-serif !important; font-size: 12.5px !important; letter-spacing: normal !important; }
+#login_box .ide-account-head { display: flex !important; flex-wrap: wrap; align-items: baseline; gap: 6px; margin-bottom: 8px; }
+#login_box .ide-account-title { color: #dfe1e5 !important; font-weight: 600 !important; }
+#login_box .ide-account-host { color: #6f737a !important; font-size: 11.5px !important; }
+#login_box .ide-account-who { flex-basis: 100%; display: flex !important; align-items: center; margin-top: 6px; color: #dfe1e5 !important; font-weight: 600 !important; }
+#login_box .sp_img, #login_box em[class*="icon"], #login_box img, #login_box .writer_nikcon { display: none !important; }
+#login_box span.ide-avatar { display: inline-grid !important; }
+#login_box a, #login_box button {
+  display: inline-block !important; background: transparent !important; border: 0 !important; color: #bcbec4 !important;
+  padding: 2px 6px !important; margin: 1px 0 !important; border-radius: 4px !important; height: auto !important; line-height: 1.6 !important;
+  width: auto !important; text-decoration: none !important;
+}
+#login_box a:hover, #login_box button:hover { background: #393b40 !important; color: #fff !important; }
+#login_box button[class*="logout"], #login_box a[class*="logout"], #login_box .btn_inout, #login_box .btn_logout {
+  border: 1px solid #4e5157 !important; padding: 1px 10px !important;
+}
+#login_box li::before, #login_box li::after, #login_box a::before, #login_box a::after,
+#login_box span::before, #login_box span::after, #login_box .bar { display: none !important; content: none !important; }
+#login_box ul, #login_box li { display: inline !important; padding: 0 !important; margin: 0 !important; border: 0 !important; }
+
+/* ====================================================================
+   Gallog (gallog.dcinside.com) → IDE account / activity view (disguiseGallog)
+   ==================================================================== */
+.gallog_wrap .headbox, .gallog_wrap .dcmain_go, .gallog_wrap .visitors_num, .gallog_wrap .calendar_wrap,
+.gallog_wrap #profile_img, .gallog_wrap .secret_tip, .gallog_wrap .dcfoot { display: none !important; }
+.gallog_wrap { width: auto !important; min-width: 0 !important; padding: 0 16px !important; }
+.gallog_wrap, .gallog_wrap * { font-family: "Segoe UI", "Malgun Gothic", system-ui, sans-serif !important; letter-spacing: normal !important; }
+.gallog_wrap .top_bar, .gallog_wrap #top_bg {
+  height: auto !important; min-height: 0 !important; background: transparent !important; background-image: none !important;
+  border: 0 !important; border-bottom: 1px solid #393b40 !important; padding: 14px 0 !important; margin: 0 !important;
+  display: flex !important; align-items: center; gap: 14px; position: relative;
+}
+.gallog_wrap .photo { width: 48px !important; height: 48px !important; background: none !important; margin: 0 !important; position: static !important; border: 0 !important; }
+.gallog_wrap span.ide-avatar.ide-avatar-lg { width: 48px; height: 48px; font-size: 20px !important; margin: 0; }
+.gallog_wrap .galler_info { position: static !important; margin: 0 !important; padding: 0 !important; color: #dfe1e5 !important; font-size: 16px !important; }
+.gallog_wrap .galler_info .nick_name { color: #dfe1e5 !important; font-size: 16px !important; font-weight: 600 !important; }
+.gallog_wrap .ide-profile-sub { color: #8c8f96 !important; font-size: 12px !important; margin-top: 2px; }
+.gallog_wrap .tright_box { margin-left: auto; position: static !important; }
+.gallog_wrap .tright_box button { filter: grayscale(1) brightness(.8); }
+
+/* layout: settings-tree left, content right */
+.gallog_wrap .conent_wrap { display: flex !important; gap: 24px; padding-top: 14px; }
+.gallog_wrap .wrap_left { flex: 0 0 190px !important; width: 190px !important; float: none !important; }
+.gallog_wrap .wrap_right { flex: 1 1 0 !important; min-width: 0; width: auto !important; float: none !important; }
+.gallog_menu li { border: 0 !important; margin: 0 0 2px !important; height: auto !important; background: transparent !important; }
+.gallog_menu li a {
+  display: block !important; height: auto !important; line-height: 28px !important; padding: 0 10px !important;
+  border: 0 !important; border-radius: 4px !important; background: transparent !important; color: #dfe1e5 !important; font-size: 13px !important; font-weight: 400 !important;
+}
+.gallog_menu li a:hover { background: #393b40 !important; }
+.gallog_menu li.on a { background: #2e436e !important; }
+
+/* sections */
+.gallog_cont { border: 0 !important; margin-bottom: 22px !important; }
+.gallog_cont .cont_head { border: 0 !important; border-bottom: 1px solid #393b40 !important; padding: 0 0 6px !important; display: flex !important; align-items: center; gap: 8px; flex-wrap: wrap; }
+.gallog_cont .cont_head .tit { color: #dfe1e5 !important; font-size: 13.5px !important; font-weight: 600 !important; }
+.gallog_cont .cont_head .num { color: #8c8f96 !important; font-weight: 400 !important; margin-left: 4px; }
+.gallog_wrap .greybox { border: 0 !important; border-radius: 3px !important; padding: 0 6px !important; background: #393b40 !important; color: #9da0a8 !important; font-size: 11px !important; line-height: 18px !important; }
+.gallog_wrap .choice_sect button { border: 0 !important; background: transparent !important; color: #9da0a8 !important; border-radius: 4px !important; padding: 2px 8px !important; }
+.gallog_wrap .choice_sect button.on { background: #393b40 !important; color: #dfe1e5 !important; }
+.gallog_wrap .gallog_empty { color: #6f737a !important; padding: 14px 0 !important; text-align: left !important; }
+
+/* list items = commit rows */
+.gallog_wrap .cont_listbox li { border: 0 !important; border-bottom: 1px solid #2b2d30 !important; padding: 7px 10px !important; margin: 0 !important; background: transparent !important; }
+.gallog_wrap .cont_listbox li:hover { background: #2b2d30 !important; }
+.gallog_wrap .cont_listbox .galltit, .gallog_wrap .cont_listbox .galltit * { color: #dfe1e5 !important; font-weight: 400 !important; font-size: 13px !important; }
+.gallog_wrap .cont_listbox .nameday, .gallog_wrap .cont_listbox .nameday *, .gallog_wrap .cont_listbox .date { color: #8c8f96 !important; font-size: 12px !important; }
+.gallog_wrap .cont_listbox .sp_img, .gallog_wrap .cont_listbox em[class*="icon"], .gallog_wrap .cont_listbox img,
+.gallog_wrap .cont_listbox .writer_nikcon { display: none !important; }
+.gallog_wrap .cont_listbox .reply_num, .gallog_wrap .cont_listbox [class*="reply"] { color: #56a8f5 !important; }
+.gallog_wrap .cont_listbox li::before, .gallog_wrap .cont_listbox .cont::before { display: none !important; }
+.gallog_wrap .bottom_paging_box a, .gallog_wrap .bottom_paging_box em { border: 0 !important; color: #9da0a8 !important; }
+/* gallog fixes */
+.gallog_wrap .photo, .gallog_wrap .photo.sp_img { filter: none !important; overflow: visible !important; background-image: none !important; border-radius: 0 !important; padding: 0 !important; }
+.gallog_wrap, .gallog_wrap #container, .gallog_wrap .conent_wrap, .gallog_wrap .wrap_left, .gallog_wrap .wrap_right,
+.gallog_wrap .top_bar, .gallog_wrap #top_bg, .gallog_wrap article { background-image: none !important; }
+.gallog_wrap .conent_wrap::before, .gallog_wrap .conent_wrap::after, .gallog_wrap .wrap_left::after, .gallog_wrap .wrap_right::before { display: none !important; }
+.gallog_wrap .wrap_left, .gallog_wrap .wrap_right { border: 0 !important; }
+.gallog_wrap .gallog_cont .cont_box, .gallog_wrap .gallog_cont { height: auto !important; min-height: 0 !important; }
+.gallog_wrap .tright_box { display: none !important; }
+/* gallog: the vertical rule is a pseudo-element on .innerbox; also let it follow the window */
+.innerbox::before, .innerbox::after { display: none !important; content: none !important; }
+.innerbox, .gallog_wrap.width1160 { width: auto !important; min-width: 0 !important; max-width: 100% !important; background-image: none !important; }
+.gallog_wrap .wrap_right::after, .gallog_wrap .wrap_left::before { display: none !important; content: none !important; }
+
+/* ====================================================================
+   Gallog layout v2 — IDE tool-window structure
+   toolbar (slim profile) → tab strip (menu) → split panels (sections) → one-line rows
+   ==================================================================== */
+/* 1. profile header → slim toolbar */
+.gallog_wrap .top_bar, .gallog_wrap #top_bg {
+  padding: 6px 4px !important; gap: 8px; border-bottom: 0 !important; min-height: 0 !important;
+}
+.gallog_wrap .photo { width: 22px !important; height: 22px !important; flex: none; }
+.gallog_wrap span.ide-avatar.ide-avatar-lg { width: 22px; height: 22px; font-size: 11px !important; }
+.gallog_wrap .galler_info { display: flex !important; align-items: baseline; gap: 8px; font-size: 13px !important; }
+.gallog_wrap .galler_info .nick_name { font-size: 13px !important; }
+.gallog_wrap .galler_info * { background: transparent !important; background-image: none !important; }
+.gallog_wrap .galler_info > :not(.nick_name):not(.ide-profile-sub) { display: none !important; }
+.gallog_wrap .ide-profile-sub { margin: 0 !important; font-size: 12px !important; }
+
+/* 2. left menu → horizontal tool-window tabs */
+.gallog_wrap .conent_wrap { flex-direction: column !important; gap: 0 !important; padding-top: 0 !important; }
+.gallog_wrap .wrap_left { flex: none !important; width: 100% !important; border-bottom: 1px solid #393b40 !important; margin-bottom: 12px !important; }
+.gallog_menu { display: flex !important; gap: 2px; padding: 0 !important; margin: 0 !important; }
+.gallog_menu li { margin: 0 !important; }
+.gallog_menu li a {
+  line-height: 32px !important; padding: 0 12px !important; border-radius: 0 !important;
+  border-bottom: 2px solid transparent !important; color: #9da0a8 !important;
+}
+.gallog_menu li a:hover { background: #2b2d30 !important; color: #dfe1e5 !important; }
+.gallog_menu li.on a { background: transparent !important; color: #dfe1e5 !important; border-bottom-color: #3574f0 !important; }
+.gallog_wrap .wrap_right { width: 100% !important; }
+.gallog_wrap #jquery_jplayer { display: none !important; }
+
+/* 3. overview sections → split panels (2 columns) */
+.gallog_wrap.home .wrap_right > section { display: grid !important; grid-template-columns: 1fr 1fr; gap: 12px; align-items: start; }
+@media (max-width: 900px) { .gallog_wrap.home .wrap_right > section { grid-template-columns: 1fr; } }
+.gallog_wrap .gallog_cont {
+  border: 1px solid #393b40 !important; border-radius: 6px !important; margin: 0 0 12px !important; overflow: hidden;
+  background: #1e1f22 !important;
+}
+.gallog_wrap.home .wrap_right > section > section > .gallog_cont { margin: 0 !important; }
+.gallog_wrap .gallog_cont > header { background: #2b2d30 !important; }
+.gallog_wrap .gallog_cont .cont_head { border-bottom: 1px solid #393b40 !important; padding: 6px 10px !important; min-height: 0 !important; height: auto !important; }
+.gallog_wrap .gallog_cont .cont_head .tit { font-size: 12px !important; text-transform: none; }
+.gallog_wrap .greybox { white-space: nowrap; width: auto !important; height: auto !important; overflow: visible !important; }
+.gallog_wrap .gallog_empty { padding: 10px !important; font-weight: 400 !important; }
+.gallog_wrap .cont_box { padding: 0 !important; border: 0 !important; }
+
+/* 4. list items → one-line rows: message | ref | date */
+.gallog_wrap .cont_listbox li { padding: 0 10px !important; }
+.gallog_wrap .cont_listbox li .cont, .gallog_wrap .cont_listbox li .gall_linkbox { padding: 0 !important; margin: 0 !important; border: 0 !important; }
+.gallog_wrap .ide-rowbox { display: flex !important; align-items: center; gap: 10px; min-height: 28px; padding: 0 !important; }
+.gallog_wrap .ide-col-msg { flex: 1 1 auto; min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; margin: 0 !important; padding: 0 !important; }
+.gallog_wrap .ide-col-msg * { display: inline !important; white-space: nowrap !important; }
+.gallog_wrap .ide-col-meta { flex: none; display: flex !important; align-items: center; gap: 8px; margin: 0 !important; padding: 0 !important; }
+.gallog_wrap .ide-col-meta * { border: 0 !important; margin: 0 !important; padding: 0 !important; }
+.gallog_wrap .ide-col-meta *::before, .gallog_wrap .ide-col-meta *::after, .gallog_wrap .ide-col-meta::before, .gallog_wrap .ide-col-meta::after { display: none !important; content: none !important; }
+.gallog_wrap .ide-ref { padding: 0 6px !important; border-radius: 3px !important; background: #253a2c !important; color: #5fb865 !important; font-size: 11px !important; line-height: 17px; max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.gallog_wrap .ide-col-date { color: #6f737a !important; font-family: "JetBrains Mono", Consolas, monospace !important; font-size: 11px !important; }
+.gallog_wrap .ide-col-extra { flex: 0 1 30%; min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; color: #6f737a !important; font-size: 12px !important; font-weight: 400 !important; margin: 0 !important; }
+.gallog_wrap .ide-col-extra * { color: #6f737a !important; font-weight: 400 !important; display: inline !important; }
+/* comment reply marker (└) */
+.gallog_wrap .comments .cont_listbox li::before, .gallog_wrap .comments .cont::before, .gallog_wrap .comments .link::before,
+.gallog_wrap .comments [class*="reply"]::before { display: none !important; content: none !important; }
+.gallog_wrap .comments .cont, .gallog_wrap .comments .link, .gallog_wrap .comments .gall_linkbox { padding-left: 0 !important; background-image: none !important; }
+/* gallog v2 fixes */
+.gallog_wrap .top_bar { display: block !important; }
+.gallog_wrap #top_bg { display: flex !important; flex-direction: row !important; flex-wrap: nowrap !important; align-items: center !important; }
+.gallog_wrap .photo { order: -1; float: none !important; }
+.gallog_wrap .galler_info { float: none !important; }
+.gallog_menu li { width: auto !important; flex: none !important; float: none !important; }
+.gallog_wrap .cont_box, .gallog_wrap .cont_box > *, .gallog_wrap .gallog_empty { height: auto !important; min-height: 0 !important; }
+.gallog_wrap .gallog_cont .cont_box { border-bottom: 0 !important; }
+.gallog_menu li a { width: auto !important; }
+.gallog_wrap .photo { display: flex !important; align-items: center; justify-content: center; height: 22px !important; line-height: 0 !important; font-size: 0 !important; }
+.gallog_wrap .photo span.ide-avatar { display: grid !important; margin: 0 !important; line-height: 1 !important; }
+
+/* review-comment rows: the comment itself is the message, the parent post title is the dim trailing column */
+.gallog_wrap .comments .ide-col-extra { order: 0; flex: 1 1 auto; color: #dfe1e5 !important; font-size: 13px !important; }
+.gallog_wrap .comments .ide-col-extra * { color: #dfe1e5 !important; }
+.gallog_wrap .comments .ide-col-meta { order: 1; }
+.gallog_wrap .comments .ide-col-msg { order: 2; flex: 0 1 28%; }
+.gallog_wrap .comments .ide-col-msg, .gallog_wrap .comments .ide-col-msg * { color: #6f737a !important; font-size: 12px !important; }
+/* empty strip under lists (more/paging placeholders) */
+.gallog_wrap .cont_box > :empty, .gallog_wrap .cont_box > div:not(.gallog_empty):not(:has(*)) { display: none !important; }
+.gallog_wrap .cont_listbox li:last-child { border-bottom: 0 !important; }
+
+/* account box: let the link row wrap instead of overflowing */
+#login_box, #login_box * { white-space: normal !important; }
+#login_box a, #login_box button { white-space: nowrap !important; }
+#login_box div, #login_box ul, #login_box p { max-width: 100% !important; flex-wrap: wrap !important; width: auto !important; }
+#login_box .ide-nick-host { display: inline-flex !important; align-items: center; color: #dfe1e5 !important; font-weight: 600 !important; }
+#login_box div, #login_box ul, #login_box p, #login_box li { height: auto !important; min-height: 0 !important; position: static; float: none !important; }
+#login_box [id], #login_box [class*="pop"], #login_box [class*="layer"] { position: absolute; }
+#login_box .ide-account-head, #login_box .ide-nick-host { position: static !important; }
+
+/* ====================================================================
+   Gallog v3: everything flush-left; sections stacked (1 column) as
+   IntelliJ collapsible tool-window groups
+   ==================================================================== */
+.gallog_wrap .conent_wrap, .gallog_wrap .wrap_left, .gallog_wrap .wrap_right, .gallog_wrap .wrap_right > section,
+.gallog_wrap .gallog_menu, .gallog_wrap .top_bar, .gallog_wrap #top_bg, .gallog_wrap .gallog_cont {
+  padding-left: 0 !important; margin-left: 0 !important;
+}
+.gallog_wrap .wrap_right { padding-right: 0 !important; }
+.gallog_menu li:first-child a { padding-left: 2px !important; }
+
+/* single column */
+.gallog_wrap.home .wrap_right > section { display: block !important; }
+.gallog_wrap .gallog_cont, .gallog_wrap.home .wrap_right > section > section > .gallog_cont {
+  border: 0 !important; border-radius: 0 !important; background: transparent !important; margin: 0 0 6px !important; overflow: visible;
+}
+/* group header: ▾ Title  count  [badge] ────────── */
+.gallog_wrap .gallog_cont > header { background: transparent !important; }
+.gallog_wrap .gallog_cont .cont_head {
+  padding: 4px 0 !important; border-bottom: 0 !important; display: flex !important; align-items: center; gap: 6px;
+}
+.gallog_wrap .gallog_cont .cont_head .tit { font-size: 12.5px !important; font-weight: 600 !important; cursor: pointer; display: flex !important; align-items: center; }
+.gallog_wrap .gallog_cont .cont_head .tit::before { content: "▾"; color: #8c8f96; font-size: 11px; width: 14px; display: inline-block; }
+.gallog_wrap .gallog_cont .cont_head::after { content: ""; flex: 1 1 auto; height: 1px; background: #393b40; margin-left: 6px; order: 99; }
+.gallog_wrap .greybox { border: 0 !important; background: #393b40 !important; }
+/* rows: indented under the chevron like tree children, with a guide line */
+.gallog_wrap .cont_box { margin-left: 6px !important; border-left: 1px solid #393b40 !important; padding-left: 0 !important; }
+.gallog_wrap .cont_listbox li { padding: 0 8px 0 12px !important; border-bottom: 0 !important; border-radius: 3px; }
+.gallog_wrap .cont_listbox li:hover { background: #2b2d30 !important; }
+.gallog_wrap .gallog_empty { padding: 4px 12px !important; }
+.gallog_wrap .gallog_cont .cont_head::after {
+  content: "" !important; display: block !important; visibility: visible !important; flex: 1 1 auto !important;
+  height: 1px !important; background: #393b40 !important; margin-left: 6px !important; clear: none !important;
+}
+.gallog_wrap .cont_box { border-bottom: 0 !important; }
+.gallog_wrap .wrap_right > section > section, .gallog_wrap .wrap_right > section { margin: 0 !important; padding: 0 !important; }
+.gallog_wrap .gallog_cont { margin: 0 0 10px !important; }
+.gallog_wrap .top_bar { margin-bottom: 4px !important; }
+.gallog_wrap .wrap_left { margin-bottom: 10px !important; }
+.gallog_wrap .gallog_cont .cont_head .tit::before { font-size: 12px; }
