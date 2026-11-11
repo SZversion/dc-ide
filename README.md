@@ -74,6 +74,8 @@ It needs: logged in, at least one tab open, and dcinside's alarm setting turned 
 - **Ctrl+Shift+F12** (global) or **Esc Esc**: boss mode → fake `OrderService.java`, all audio muted, balloons suppressed
 - Ctrl+T / Ctrl+W / Ctrl+Tab: new / close / next tab
 - Ctrl+L: address bar · Alt+←/→: back/forward · F5: reload · Alt+1: toggle project panel
+- **Shift+T** (RdPathofexile pages, outside text fields): translate titles, post text and comments to Korean and back. Uses Google Translate's
+  unofficial endpoint, so the text is sent to Google and the feature may stop working if Google changes it.
 
 ## Settings (⚙ bottom-left)
 - Images & videos, one of:

@@ -139,6 +139,28 @@ ipcMain.handle('gall:search', async (_e, keyword) => {
   }
   return out;
 });
+// Reddit Shift+T: Korean translation via Google's unofficial gtx endpoint (no key).
+// shortcut: unofficial endpoint may get blocked/changed; switch to the Cloud Translation API if it does.
+ipcMain.handle('translate', async (_e, texts) => {
+  if (!Array.isArray(texts)) return [];
+  const qs = texts.slice(0, 2000).map((t) => String(t).slice(0, 5000));
+  const chunks = [];
+  for (let i = 0; i < qs.length; i += 50) chunks.push(qs.slice(i, i + 50));
+  const parts = await Promise.all(chunks.map(async (chunk) => {
+    const res = await fetch('https://translate.googleapis.com/translate_a/t?client=gtx&sl=auto&tl=ko', {
+      method: 'POST',
+      headers: { 'content-type': 'application/x-www-form-urlencoded' },
+      body: chunk.map((q) => 'q=' + encodeURIComponent(q)).join('&'),
+    });
+    if (!res.ok) throw new Error('translate HTTP ' + res.status);
+    const json = await res.json();
+    // normally [["..","en"], ...]; guard the flat ["..","en"] shape too
+    const rows = typeof json[0] === 'string' ? [json] : json;
+    if (rows.length !== chunk.length) throw new Error('translate: got ' + rows.length + ' of ' + chunk.length);
+    return rows.map((r) => (Array.isArray(r) ? String(r[0]) : String(r)));
+  }));
+  return parts.flat();
+});
 ipcMain.on('win:title', (_e, t) => { if (win) win.setTitle(String(t).slice(0, 120)); });
 ipcMain.on('win:flash', () => { if (win && !win.isFocused()) win.flashFrame(true); });
 ipcMain.on('win:native-notify', (_e, { title, body }) => {

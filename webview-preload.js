@@ -20,6 +20,13 @@ if (!injectSkin()) {
 }
 // some pages rebuild <head>; re-check once the DOM is ready
 document.addEventListener('DOMContentLoaded', injectSkin);
+// reddit: drop the subreddit's own stylesheet (header banner, flair icons) before it paints
+if (/(^|\.)reddit\.com$/.test(location.hostname)) {
+  const dropSrCss = () => document.querySelectorAll('[title="applied_subreddit_stylesheet"]').forEach((l) => l.remove());
+  const srObs = new MutationObserver(dropSrCss);
+  srObs.observe(document, { childList: true, subtree: true });
+  document.addEventListener('DOMContentLoaded', () => { dropSrCss(); srObs.disconnect(); });
+}
 
 // ---- 2. settings from the host (dim images etc.)
 // Dimming lives in its own <style> so the page resetting <html class> can't undo it.
@@ -943,6 +950,57 @@ function rdLogin() {
   }
 }
 
+// ---- reddit Shift+T: translate titles / post body / comments to Korean (text nodes only, so markup and links stay)
+const TR_SEL = '#siteTable .thing.link a.title, #siteTable .thing.link span.title, #siteTable .usertext-body .md, .commentarea .usertext-body .md';
+const trOrig = new Map();   // text node → original text
+const trCache = new Map();  // original text → translation
+let trOn = false;
+let trBusy = false;
+let trAgain = false;  // comments arrived while a batch was in flight → run once more after it
+async function translatePage() {
+  if (!trOn) return;
+  if (trBusy) { trAgain = true; return; }
+  const nodes = [];
+  for (const el of document.querySelectorAll(TR_SEL)) {
+    const w = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+    for (let n; (n = w.nextNode());) {
+      if (!n.nodeValue.trim() || trOrig.has(n) || n.parentElement.closest('.ide-fold')) continue;
+      nodes.push(n);
+    }
+  }
+  const todo = [...new Set(nodes.map((n) => n.nodeValue).filter((t) => !trCache.has(t)))];
+  trBusy = true;
+  try {
+    if (todo.length) {
+      const res = await ipcRenderer.invoke('translate', todo);
+      todo.forEach((t, i) => trCache.set(t, res[i]));
+    }
+    if (!trOn) return;
+    for (const n of nodes) { trOrig.set(n, n.nodeValue); n.nodeValue = trCache.get(n.nodeValue) ?? n.nodeValue; }
+  } catch (err) {
+    console.warn('[ide] translate failed:', err && err.message);
+  } finally {
+    trBusy = false;
+    if (trAgain) { trAgain = false; translatePage(); }
+  }
+}
+function untranslatePage() {
+  for (const [n, t] of trOrig) n.nodeValue = t;
+  trOrig.clear();
+}
+if (isRd) {
+  window.addEventListener('keydown', (e) => {
+    if (!(e.shiftKey && !e.altKey && !e.ctrlKey && !e.metaKey && e.code === 'KeyT')) return;
+    // Shift+T is a capital T while typing — leave text fields alone
+    const t = e.target;
+    if (t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName))) return;
+    e.preventDefault(); e.stopPropagation();
+    trOn = !trOn;
+    document.documentElement.classList.toggle('ide-translated', trOn);
+    if (trOn) translatePage(); else untranslatePage();
+  }, true);
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   injectSkin();
   watchAlarms();
@@ -955,7 +1013,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const obs = new MutationObserver(() => {
         if (pending) return;
         pending = true;
-        requestAnimationFrame(() => { pending = false; rdComments(); foldMedia(); });
+        requestAnimationFrame(() => { pending = false; rdComments(); foldMedia(); translatePage(); });
       });
       obs.observe(ca, { childList: true, subtree: true });
       // page JS can inject the post's media (.expando) after load
