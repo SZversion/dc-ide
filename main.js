@@ -1,5 +1,6 @@
 const { app, BrowserWindow, ipcMain, globalShortcut, Notification, session } = require('electron');
 const path = require('path');
+const { isAllowed, toOldReddit } = require('./url-rules');
 const fs = require('fs');
 
 // Look like a plain Chrome to the site (drop the Electron / app tokens from the UA).
@@ -43,6 +44,9 @@ function createWindow() {
 }
 
 // Lock down every <webview> and give it our preload.
+// Rewritten URL if allowed, else null.
+const checkUrl = (url) => { const r = toOldReddit(url); return isAllowed(r) ? r : null; };
+
 app.on('web-contents-created', (_e, contents) => {
   contents.on('will-attach-webview', (_ev, webPreferences, params) => {
     delete webPreferences.preloadURL;
@@ -50,9 +54,8 @@ app.on('web-contents-created', (_e, contents) => {
     webPreferences.nodeIntegration = false;
     webPreferences.contextIsolation = true;
     webPreferences.sandbox = true;
-    if (!/^https:\/\/([a-z0-9-]+\.)*dcinside\.com\//i.test(params.src || '')) {
-      params.src = 'https://gall.dcinside.com/';
-    }
+    params.src = toOldReddit(params.src || '');
+    if (!isAllowed(params.src)) params.src = 'https://gall.dcinside.com/';
   });
 
   if (contents.getType() !== 'webview') return;
@@ -63,9 +66,21 @@ app.on('web-contents-created', (_e, contents) => {
     if (/^https:\/\/(accounts\.google\.com|appleid\.apple\.com)\//i.test(url)) {
       return { action: 'allow', overrideBrowserWindowOptions: { width: 520, height: 680, autoHideMenuBar: true, backgroundColor: '#1e1f22' } };
     }
-    if (/^https?:/i.test(url) && win) win.webContents.send('open-tab', url);
+    const ok = checkUrl(url);
+    if (ok && win) win.webContents.send('open-tab', ok);
     return { action: 'deny' };
   });
+
+  // Main frame only: embeds (YouTube, reCAPTCHA, redditmedia) are subframes and must keep loading.
+  const guard = (ev, url, _inPlace, isMainFrame) => {
+    if (!isMainFrame) return;
+    const ok = checkUrl(url);
+    if (ok === url) return;
+    ev.preventDefault();
+    if (ok) contents.loadURL(ok);
+  };
+  contents.on('will-navigate', guard);
+  contents.on('will-redirect', guard);
 
   // Same-origin iframes (e.g. editor frames) get the skin too.
   contents.on('did-frame-finish-load', () => {
@@ -81,6 +96,8 @@ app.on('web-contents-created', (_e, contents) => {
     }
   });
 });
+
+ipcMain.on('url:check', (e, url) => { e.returnValue = checkUrl(String(url)); });
 
 ipcMain.on('get-skin-css', (e) => { e.returnValue = SKIN_CSS; });
 

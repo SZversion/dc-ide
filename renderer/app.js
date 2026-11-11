@@ -143,6 +143,8 @@ function syncChrome() {
   renderTree();
 }
 
+function hostOf(u) { try { return new URL(u).hostname; } catch (_) { return u; } }
+
 function navigate(input) {
   const v = input.trim();
   if (!v) return;
@@ -150,7 +152,7 @@ function navigate(input) {
   if (/^https?:\/\//i.test(v)) url = v;
   else if (/^[a-z0-9_]+$/i.test(v) && v.length <= 40 && !/^\d+$/.test(v)) url = gallUrl({ id: v, kind: 'board' });
   else url = `https://search.dcinside.com/combine/q/${dcEncode(v)}`;
-  if (active) active.wv.loadURL(url); else newTab(url);
+  open(url, !active);
 }
 
 // ---------------------------------------------------------------- project tree
@@ -199,7 +201,11 @@ function node(depth, opts) {
   return d;
 }
 
-function open(url, inNewTab) { if (inNewTab || !active) newTab(url); else active.wv.loadURL(url); }
+function open(url, inNewTab) {
+  const ok = window.ide.checkUrl(url);
+  if (!ok) { balloon('Blocked', `${hostOf(url)} is not part of this workspace`); return; }
+  if (inNewTab || !active) newTab(ok); else active.wv.loadURL(ok);
+}
 
 function renderTree() {
   const tree = $('#tree');

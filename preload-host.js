@@ -6,5 +6,6 @@ contextBridge.exposeInMainWorld('ide', {
   nativeNotify: (title, body) => ipcRenderer.send('win:native-notify', { title, body }),
   onOpenTab: (cb) => ipcRenderer.on('open-tab', (_e, url) => cb(url)),
   onBossToggle: (cb) => ipcRenderer.on('boss-toggle', () => cb()),
+  checkUrl: (url) => ipcRenderer.sendSync('url:check', url),
   searchGalleries: (keyword) => ipcRenderer.invoke('gall:search', keyword),
 });
