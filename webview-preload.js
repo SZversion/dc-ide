@@ -858,11 +858,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const ca = document.querySelector('.commentarea');
     if (ca) {
       let pending = false;
-      new MutationObserver(() => {
+      const obs = new MutationObserver(() => {
         if (pending) return;
         pending = true;
         requestAnimationFrame(() => { pending = false; rdComments(); foldMedia(); });
-      }).observe(ca, { childList: true, subtree: true });
+      });
+      obs.observe(ca, { childList: true, subtree: true });
+      // page JS can inject the post's media (.expando) after load
+      obs.observe(document.querySelector('#siteTable > .thing') || ca, { childList: true, subtree: true });
     }
   }
   sendMeta();          // must read the real gallery name before disguiseList() renames it
