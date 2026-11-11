@@ -59,6 +59,10 @@ app.on('web-contents-created', (_e, contents) => {
 
   // window.open / target=_blank → new editor tab instead of a stray Electron window.
   contents.setWindowOpenHandler(({ url }) => {
+    // Social sign-in (reddit → Google / Apple) must stay a real popup: it hands the result back to its opener.
+    if (/^https:\/\/(accounts\.google\.com|appleid\.apple\.com)\//i.test(url)) {
+      return { action: 'allow', overrideBrowserWindowOptions: { width: 520, height: 680, autoHideMenuBar: true, backgroundColor: '#1e1f22' } };
+    }
     if (/^https?:/i.test(url) && win) win.webContents.send('open-tab', url);
     return { action: 'deny' };
   });
