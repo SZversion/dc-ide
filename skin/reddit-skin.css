@@ -124,6 +124,8 @@ body .ide-dialog .ide-dlg-logo { font-family: "JetBrains Mono", Consolas, monosp
 }
 .ide-rd-body > * { margin-left: 18px !important; margin-right: 18px !important; }
 .ide-rd-body .md, .ide-rd-body .md * { line-height: 1.75 !important; }
+/* reddit's own box around the self-text (.link .usertext .md) — the CHANGELOG.md panel is the only frame */
+.ide-rd-body .usertext-body, .ide-rd-body .md { border: 0 !important; border-radius: 0 !important; background: transparent !important; padding: 0 !important; box-shadow: none !important; }
 .ide-link-url { color: #56a8f5; font: 12.5px "JetBrains Mono", Consolas, monospace; user-select: text; margin: 4px 0 8px; word-break: break-all; }
 .thing.link .tagline > div { margin: 2px 0; }
 

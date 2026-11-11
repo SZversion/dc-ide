@@ -711,7 +711,11 @@ function rdList() {
     const c = row.querySelector('a.comments');
     if (c) c.textContent = `(#${row.dataset.commentsCount || parseInt(c.textContent, 10) || 0})`;
     const a = row.querySelector('a.title');
-    if (a && row.dataset.permalink) a.setAttribute('href', row.dataset.permalink);
+    if (a && row.dataset.permalink) {
+      a.setAttribute('href', row.dataset.permalink);
+      // reddit swaps outbound links to its out.reddit.com click tracker on mousedown, which the URL guard blocks
+      a.removeAttribute('data-outbound-url'); a.classList.remove('outbound');
+    }
   }
 
   // tabs: new → All commits (first, like dc's 전체글), hot → Active, top (this week) → Starred; the rest are hidden by CSS
