@@ -1,6 +1,6 @@
 const { app, BrowserWindow, ipcMain, globalShortcut, Notification, session } = require('electron');
 const path = require('path');
-const { isAllowed, toOldReddit } = require('./url-rules');
+const { isAllowed, toOldReddit, normalize } = require('./url-rules');
 const fs = require('fs');
 
 // Look like a plain Chrome to the site (drop the Electron / app tokens from the UA).
@@ -16,7 +16,7 @@ app.setPath('userData', process.env.IDE_SNAPSHOT
 
 const DC_CSS = fs.readFileSync(path.join(__dirname, 'skin', 'dc-skin.css'), 'utf8');
 const RD_CSS = fs.readFileSync(path.join(__dirname, 'skin', 'reddit-skin.css'), 'utf8');
-const skinFor = (host) => (/reddit\.com$/.test(host) ? RD_CSS : DC_CSS);
+const skinFor = (host) => (/reddit\.com$/.test(host) ? RD_CSS : /dcinside\.com$/.test(host) ? DC_CSS : '');
 const BOSS_KEY = 'CommandOrControl+Shift+F12';
 
 let win;
@@ -47,7 +47,7 @@ function createWindow() {
 
 // Lock down every <webview> and give it our preload.
 // Rewritten URL if allowed, else null.
-const checkUrl = (url) => { const r = toOldReddit(url); return isAllowed(r) ? r : null; };
+const checkUrl = (url) => { const r = normalize(url); return isAllowed(r) ? r : null; };
 
 app.on('web-contents-created', (_e, contents) => {
   contents.on('will-attach-webview', (_ev, webPreferences, params) => {
@@ -74,12 +74,17 @@ app.on('web-contents-created', (_e, contents) => {
   });
 
   // Main frame only: embeds (YouTube, reCAPTCHA, redditmedia) are subframes and must keep loading.
+  let last = { url: '', at: 0 };
   const guard = (ev, url, _inPlace, isMainFrame) => {
     if (!isMainFrame) return;
     const ok = checkUrl(url);
     if (ok === url) return;
     ev.preventDefault();
-    if (ok) contents.loadURL(ok);
+    if (!ok) return;
+    // old.reddit may bounce some paths back to www: don't rewrite the same URL again within 2s (loop).
+    if (ok === last.url && Date.now() - last.at < 2000) return;
+    last = { url: ok, at: Date.now() };
+    contents.loadURL(ok);
   };
   contents.on('will-navigate', guard);
   contents.on('will-redirect', guard);

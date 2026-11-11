@@ -62,7 +62,7 @@ A second source, the r/pathofexile community on `old.reddit.com` (login required
 - Login: **External Libraries › Auth: rd-session-config** shows the sign-in as the "GitLab 계정 로그인" dialog;
   captcha / 2FA steps, or a submit that stays on the login page (~5s), fall back to the site's own screen. Google/Apple sign-in open as real popups.
 - Only dcinside, `old.reddit.com` and the reddit/Google/Apple sign-in pages load; other `www.reddit.com` links open as `old.reddit.com`.
-  Any other external link does nothing except a "Blocked" balloon in the address bar.
+  Any other external link does nothing; only typed addresses and tree items show a "Blocked" balloon.
 
 ## Notifications
 dcinside's PC page polls its alarm API every ~60s and shows a pop-up. The app hides that pop-up and re-shows it as an IDE balloon + Notifications log entry (and optionally a Windows toast saying "Build completed").

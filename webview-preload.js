@@ -1,4 +1,4 @@
-// Runs inside every dcinside <webview> (sandboxed, isolated world).
+// Runs inside every <webview> (dcinside / reddit; popups get an empty skin) (sandboxed, isolated world).
 const { ipcRenderer } = require('electron');
 
 const CSS = ipcRenderer.sendSync('get-skin-css', location.hostname);
