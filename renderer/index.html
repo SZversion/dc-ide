@@ -124,7 +124,11 @@
   <dialog id="settings">
     <form method="dialog">
       <h3>Settings</h3>
-      <label><input type="checkbox" id="opt-dim"> Dim images &amp; videos until hover</label>
+      <fieldset class="opt-media"><legend>Images &amp; videos</legend>
+        <label><input type="radio" name="opt-media" value="dim"> Dim until hover</label>
+        <label><input type="radio" name="opt-media" value="fold"> Fold in posts &amp; comment emoticons (click to show)</label>
+        <label><input type="radio" name="opt-media" value="raw"> Show as is</label>
+      </fieldset>
       <label><input type="checkbox" id="opt-blur-boss"> Switch to code view when window loses focus</label>
       <label><input type="checkbox" id="opt-native"> Windows toast for notifications (disguised as build messages)</label>
       <label><input type="checkbox" id="opt-mute"> Mute page audio</label>

@@ -64,7 +64,12 @@ It needs: logged in, at least one tab open, and dcinside's alarm setting turned 
 - Ctrl+L: address bar · Alt+←/→: back/forward · F5: reload · Alt+1: toggle project panel
 
 ## Settings (⚙ bottom-left)
-- Dim images & videos until hover (default on)
+- Images & videos, one of:
+  - **Dim until hover**
+  - **Fold** (default): images/GIFs/videos in the post body and emoticons (dccon) in body and comments become a one-line
+    `<<<<<<< HEAD:image_1.png (click to resolve)` marker. Click it to show the media as the site shows it; click the media to fold it again.
+    Everything else is dimmed. Always starts folded. The site's per-image comment buttons (댓글 열기 / 이미지 댓글 ON) are hidden; image comments themselves still show.
+  - **Show as is**
 - Switch to code view when the window loses focus
 - Windows toast for notifications
 - Mute page audio (default on)

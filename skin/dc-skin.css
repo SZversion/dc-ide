@@ -54,7 +54,9 @@ ins.adsbygoogle, .banner_box, .bnr_wrap, .dc_banner, .dcwrap_sky, .rtbAlarmPopup
 .minor_intro_box .intro_bg,
 .con_banner, .writing_banbox, .kakao_ad_area, [class*="_ad_area"], [id*="google_ads"],
 iframe[id^="criteo"], .gallview_contents iframe:not(.write_div iframe), .rcont_imgtxt_box.dcissue,
-#hdline_ban { display: none !important; }
+#hdline_ban,
+#zzbang_ad /* in-body banner slot (addc NetInsight / kakao / adsense), e.g. game galleries */
+{ display: none !important; }
 
 /* wide layout: drop the 1160px centring so it fills the editor pane */
 .dcwrap, .width1160, .wrap_inner, #container { width: auto !important; max-width: none !important; margin: 0 !important; }
@@ -209,6 +211,20 @@ span.ide-avatar {
 .write_div { padding: 14px 18px 18px 18px !important; border-left: 3px solid #2b2d30 !important; }
 .write_div, .write_div * { color: #bcbec4 !important; line-height: 1.75 !important; }
 .write_div a, .write_div a * { color: #56a8f5 !important; }
+
+/* fold mode: media → one-line merge-conflict marker (button only exists when the setting is on) */
+.ide-folded { display: none !important; }
+.ide-foldable { opacity: 1 !important; filter: none !important; cursor: zoom-out !important; }
+span.ide-fold {
+  display: inline-block !important; margin: 2px 0 !important; padding: 0 6px !important; cursor: pointer !important;
+  font: 12.5px/1.6 "JetBrains Mono", Consolas, monospace !important; background: #2b2d30 !important; border-radius: 3px;
+  white-space: nowrap; user-select: none;
+}
+span.ide-fold:hover { background: #393b40 !important; }
+span.ide-fold.ide-open { display: none !important; }
+span.ide-fold > b.ide-m { color: #e06c75 !important; font-weight: 600 !important; }
+span.ide-fold > b.ide-f { color: #5fb865 !important; font-weight: 400 !important; }
+span.ide-fold > i.ide-h { color: #6f737a !important; font-style: normal !important; }
 
 /* 추천 / 비추천 → Approve / Request changes */
 .btn_recommend_box { margin: 16px 0 !important; padding: 0 !important; border: 0 !important; }

@@ -30,18 +30,88 @@ img:hover, video:hover, .write_div iframe:hover, a:hover img, .img_box:hover, .t
   opacity: 1 !important; filter: none !important; }
 .sp_img img, .icon_img img, img[width="12"], img[width="14"], img[height="12"], img.written_dccon:hover { opacity: .8 !important; }`;
 let settings = null;
+// settings.media: 'dim' (dim everything) | 'fold' (fold post media + dccons, dim the rest) | 'raw' (as is)
 function applySettings() {
   if (!settings || !document.documentElement) return;
+  const dim = settings.media === 'dim' || settings.media === 'fold';
   let s = document.getElementById('__ide_dim');
-  if (settings.dim && !s) {
+  if (dim && !s) {
     s = document.createElement('style');
     s.id = '__ide_dim';
     s.textContent = DIM_CSS;
     (document.head || document.documentElement).appendChild(s);
-  } else if (!settings.dim && s) {
+  } else if (!dim && s) {
     s.remove();
   }
+  let f = document.getElementById('__ide_fold');
+  if (settings.media === 'fold' && !f) {
+    f = document.createElement('style');
+    f.id = '__ide_fold';
+    f.textContent = FOLD_CSS;
+    (document.head || document.documentElement).appendChild(f);
+  } else if (settings.media !== 'fold' && f) {
+    f.remove();
+  }
+  if (settings.media === 'fold') foldMedia(); else unfoldAll();
 }
+// fold mode only: drop the site's per-image comment buttons ("댓글 열기", hover "이미지 댓글 ON"); the comment box stays
+const FOLD_CSS = '.btn_imgcmtopen, .btn_imgcmt, .img_comment_toggle { display: none !important; }';
+
+// ---- 2b. fold mode: each media becomes a one-line "<<<<<<< HEAD:image_1.png" button.
+// Button click → media shown as the site shows it; media click → folded again.
+const FOLD_AREAS = [
+  ['.write_div', 'img, video'],
+  ['.view_comment', '.written_dccon, .coment_dccon_img img, .coment_dccon_img video'],
+];
+function foldMedia() {
+  if (!settings || settings.media !== 'fold') return;
+  for (const [areaSel, sel] of FOLD_AREAS) for (const area of document.querySelectorAll(areaSel)) {
+    for (const el of area.querySelectorAll(sel)) {
+      if (el.classList.contains('ide-foldable') || (el.tagName !== 'VIDEO' && el.closest('video'))) continue;
+      const kind = el.matches('.written_dccon, .coment_dccon_img *') ? 'dccon' : el.tagName === 'VIDEO' ? 'video' : 'image';
+      // shortcut: dcinside image URLs carry no extension, so only an explicit .gif is detected
+      const ext = el.tagName === 'VIDEO' ? 'mp4' : /\.gif\b/i.test((el.currentSrc || el.src || '') + (el.alt || '')) ? 'gif' : 'png';
+      const n = area.querySelectorAll(`.ide-fold[data-kind="${kind}"]`).length + 1;
+      const btn = document.createElement('span');
+      btn.className = 'ide-fold';
+      btn.dataset.kind = kind;
+      btn.setAttribute('role', 'button');
+      btn.tabIndex = 0;
+      btn.innerHTML = '<b class="ide-m">&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD:</b><b class="ide-f"></b> <i class="ide-h">(click to resolve)</i>';
+      btn.querySelector('.ide-f').textContent = `${kind}_${n}.${ext}`;
+      el.classList.add('ide-foldable');
+      el.parentNode.insertBefore(btn, el);
+      setFolded(el, true);
+    }
+  }
+}
+function setFolded(el, folded) {
+  el.classList.toggle('ide-folded', folded);
+  const btn = el.previousElementSibling;
+  if (btn && btn.classList.contains('ide-fold')) btn.classList.toggle('ide-open', !folded);
+  if (el.tagName === 'VIDEO') { if (folded) el.pause(); else if (el.autoplay || el.loop) el.play().catch(() => {}); }
+}
+function unfoldAll() {
+  document.querySelectorAll('.ide-fold').forEach((b) => b.remove());
+  document.querySelectorAll('.ide-foldable').forEach((el) => {
+    el.classList.remove('ide-foldable', 'ide-folded');
+    if (el.tagName === 'VIDEO' && (el.autoplay || el.loop)) el.play().catch(() => {});
+  });
+}
+// capture phase so the site's own handlers (image pop-up, links) never see these clicks
+function onFoldClick(e) {
+  const t = e.target;
+  if (!t || !t.closest) return;
+  const btn = t.closest('.ide-fold');
+  const media = btn ? btn.nextElementSibling : t.closest('.ide-foldable');
+  if (!media || !media.classList.contains('ide-foldable')) return;
+  if (e.type === 'keydown' && !(btn && (e.key === 'Enter' || e.key === ' '))) return;
+  e.preventDefault();
+  e.stopImmediatePropagation();
+  setFolded(media, !btn);
+}
+window.addEventListener('click', onFoldClick, true);
+window.addEventListener('keydown', onFoldClick, true);
 ipcRenderer.on('settings', (_e, s) => { settings = s || {}; applySettings(); });
 ipcRenderer.sendToHost('need-settings');
 document.addEventListener('DOMContentLoaded', applySettings);
@@ -362,7 +432,7 @@ function disguiseView() {
     new MutationObserver(() => {
       if (pending) return;
       pending = true;
-      requestAnimationFrame(() => { pending = false; disguiseComments(); });
+      requestAnimationFrame(() => { pending = false; disguiseComments(); foldMedia(); });
     }).observe(cbox, { childList: true, subtree: true });
   }
 }

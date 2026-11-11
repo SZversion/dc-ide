@@ -8,7 +8,11 @@ const store = {
   get(k, d) { try { const v = localStorage.getItem('ide.' + k); return v == null ? d : JSON.parse(v); } catch { return d; } },
   set(k, v) { try { localStorage.setItem('ide.' + k, JSON.stringify(v)); } catch { /* ignore */ } },
 };
-const settings = Object.assign({ dim: true, blurBoss: false, native: true, mute: true }, store.get('settings', {}));
+const savedSettings = store.get('settings', {});
+// migrate the old dim checkbox: on → 'dim', off → 'raw'; fresh installs get 'fold'
+if (!savedSettings.media && 'dim' in savedSettings) savedSettings.media = savedSettings.dim ? 'dim' : 'raw';
+delete savedSettings.dim;
+const settings = Object.assign({ media: 'fold', blurBoss: false, native: true, mute: true }, savedSettings);
 let galleries = store.get('galleries', []);   // [{id, kind, name}]
 let recent = store.get('recent', []);         // [{id, kind, name}]
 let bookmarks = store.get('bookmarks', []);   // [{url, label, title}]
@@ -415,13 +419,15 @@ document.querySelectorAll('.stripe.left [data-tw]').forEach((b) => b.addEventLis
 })();
 
 // settings dialog
-const optMap = { 'opt-dim': 'dim', 'opt-blur-boss': 'blurBoss', 'opt-native': 'native', 'opt-mute': 'mute' };
+const optMap = { 'opt-blur-boss': 'blurBoss', 'opt-native': 'native', 'opt-mute': 'mute' };
 $('#btn-settings').onclick = () => {
   for (const [id, k] of Object.entries(optMap)) $('#' + id).checked = !!settings[k];
+  document.querySelectorAll('input[name="opt-media"]').forEach((r) => { r.checked = r.value === settings.media; });
   $('#settings').showModal();
 };
 $('#settings').addEventListener('close', () => {
   for (const [id, k] of Object.entries(optMap)) settings[k] = $('#' + id).checked;
+  settings.media = (document.querySelector('input[name="opt-media"]:checked') || {}).value || settings.media;
   store.set('settings', settings);
   for (const t of tabs) { try { t.wv.send('settings', settings); } catch { /* not ready */ } mute(t); }
 });
