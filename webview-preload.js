@@ -1,7 +1,7 @@
 // Runs inside every dcinside <webview> (sandboxed, isolated world).
 const { ipcRenderer } = require('electron');
 
-const CSS = ipcRenderer.sendSync('get-skin-css');
+const CSS = ipcRenderer.sendSync('get-skin-css', location.hostname);
 
 // ---- 1. inject the skin as early as possible to avoid a flash of the original theme
 function injectSkin() {

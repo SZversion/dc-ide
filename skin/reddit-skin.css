@@ -1,0 +1,107 @@
+/* IDE (Darcula) skin for old.reddit.com / www.reddit.com. Same tokens as dc-skin.css.
+   Hiding is CSS-only so nothing flashes; text/row rewrites are done in webview-preload.js. */
+
+html, body { background: #1e1f22 !important; color: #bcbec4 !important; min-width: 0 !important; }
+*, *::before, *::after { text-shadow: none !important; box-shadow: none !important; }
+body, div, span, a, p, td, th, li, b, strong, em, h1, h2, h3, h4, label, input, textarea, select, button {
+  font-family: "JetBrains Mono", "D2Coding", Consolas, "Malgun Gothic", monospace !important;
+}
+div, section, article, header, footer, form, table, tr, td, th, ul, ol, li, p, span, em, strong, b, i, h1, h2, h3, h4, label, blockquote {
+  background-color: transparent !important; color: inherit !important; border-color: #393b40 !important;
+}
+a, a * { color: #bcbec4 !important; }
+a:hover, a:hover * { color: #56a8f5 !important; text-decoration: underline !important; }
+a:visited, a:visited * { color: #8c8f96 !important; }
+input, textarea, select, button, .btn {
+  background-color: #2b2d30 !important; color: #dfe1e5 !important; border: 1px solid #4e5157 !important; border-radius: 4px !important;
+}
+input:focus, textarea:focus, select:focus { border-color: #3574f0 !important; outline: none !important; }
+iframe { color-scheme: dark; }
+::-webkit-scrollbar { width: 10px; height: 10px; background: #1e1f22; }
+::-webkit-scrollbar-thumb { background: #4e5157; border-radius: 5px; border: 2px solid #1e1f22; }
+::selection { background: #214283 !important; color: inherit !important; }
+
+/* hidden from the first paint: branding, sidebar, ads, media, vote/rank columns, actions, other tabs */
+#header-top, #sr-header-area, #header-img, .side, .footer-parent, .debuginfo,
+.thing.promoted, .promotedlink, [data-promoted="true"], .ad-container, #ad_main, .premium-banner-outer, .infobar,
+.thumbnail, .expando-button, .midcol, .rank, .flat-list.buttons li:not(.first),
+.commentarea > form.usertext, .commentarea .usertext-buttons, .reportform,
+.tabmenu li:has(a[href$="/new/"]), .tabmenu li:has(a[href$="/rising/"]),
+.tabmenu li:has(a[href$="/controversial/"]), .tabmenu li:has(a[href*="/wiki/"]),
+.ide-pinned { display: none !important; }
+
+/* wide layout: the content fills the editor pane */
+.content { margin: 0 !important; padding: 0 16px !important; max-width: none !important; }
+#header { border: 0 !important; background: transparent !important; }
+
+/* classes added by webview-preload.js (rows / commit view) */
+.ide-rd-row { display: flex !important; align-items: center; min-height: 26px; font: 12.5px "Segoe UI", "Malgun Gothic", system-ui, sans-serif !important; }
+.ide-rd-row:hover { background-color: #2b2d30 !important; }
+.ide-graph { flex: 0 0 68px; padding: 0 !important; overflow: visible; }
+.ide-graph svg { display: block; }
+.ide-ref { padding: 0 6px !important; border-radius: 3px !important; background: #253a2c !important; color: #5fb865 !important; font-size: 11px !important; line-height: 17px; white-space: nowrap; }
+.ide-commit-meta { font: 12px "JetBrains Mono", Consolas, monospace !important; color: #9da0a8; margin-bottom: 6px; }
+.ide-commit-meta .k { color: #cf8e6d; }
+.ide-commit-meta .h { color: #b3ae60; }
+span.ide-avatar {
+  background-color: var(--av, #4a5a8a) !important;
+  display: inline-grid !important; place-items: center; flex: none;
+  width: 22px; height: 22px; border-radius: 50%; margin-right: 6px;
+  color: #fff !important; font: 600 11px "Segoe UI", sans-serif !important; vertical-align: middle;
+}
+
+/* login page (new-reddit markup, shadow DOM): dark base; Task 6 adds html.ide-rd-login */
+html.ide-rd-login, html.ide-rd-login body { background: #1e1f22 !important; color-scheme: dark; }
+
+/* ---- sign-in dialog: identical to dc-skin.css ---- */
+.ide-dialog {
+  position: fixed !important; top: 42%; left: 50%; transform: translate(-50%, -50%); z-index: 1000;
+  width: 400px; max-width: calc(100vw - 32px);
+  background: #2b2d30 !important; border: 1px solid #4e5157 !important; border-radius: 8px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, .55) !important;
+  color: #dfe1e5 !important; text-align: left;
+}
+.ide-dialog, .ide-dialog * { font: 13px "Segoe UI", "Malgun Gothic", system-ui, sans-serif !important; letter-spacing: normal !important; }
+.ide-dlg-title { display: flex !important; align-items: center; gap: 8px; height: 38px; padding: 0 8px 0 12px; }
+.ide-dlg-title > span:nth-child(2) { color: #dfe1e5 !important; }
+span.ide-dlg-logo {
+  display: inline-grid !important; place-items: center; width: 18px; height: 18px; border-radius: 3px;
+  background-color: #000 !important; color: #fff !important; font: 700 8px "JetBrains Mono", Consolas, monospace !important;
+}
+.ide-dialog button.ide-dlg-x {
+  margin-left: auto; width: 28px !important; height: 28px !important; padding: 0 !important; border: 0 !important;
+  background: transparent !important; color: #9da0a8 !important; border-radius: 4px !important; font-size: 14px !important;
+}
+.ide-dialog button.ide-dlg-x:hover { background: #393b40 !important; }
+.ide-dlg-body { display: grid !important; grid-template-columns: max-content 1fr; gap: 10px 12px; align-items: center; padding: 14px 18px 8px; }
+.ide-dlg-label { color: #dfe1e5 !important; white-space: nowrap; }
+.ide-dlg-field { min-width: 0; }
+.ide-dlg-row { display: flex !important; gap: 8px; align-items: center; }
+.ide-dialog input[type="text"], .ide-dialog input[type="password"], .ide-dialog input.ide-dlg-server {
+  width: 100% !important; height: 30px !important; padding: 0 8px !important; margin: 0 !important;
+  background: #2b2d30 !important; background-image: none !important;
+  border: 1px solid #4e5157 !important; border-radius: 4px !important; color: #dfe1e5 !important; outline: none !important;
+}
+.ide-dialog input[type="text"]:focus, .ide-dialog input[type="password"]:focus { border-color: #3574f0 !important; box-shadow: 0 0 0 1px #3574f0 !important; }
+.ide-dialog input.ide-dlg-server { color: #6f737a !important; border-color: #43454a !important; }
+.ide-dlg-row input { flex: 1 1 auto; }
+.ide-dlg-hint { color: #8c8f96 !important; font-size: 12px !important; line-height: 1.4 !important; margin-top: -4px; }
+.ide-dialog .checkbox { display: flex !important; align-items: center; gap: 6px; position: static !important; }
+.ide-dialog .checkbox input { position: static !important; opacity: 1 !important; width: 14px !important; height: 14px !important; margin: 0 !important; appearance: auto !important; accent-color: #3574f0; }
+.ide-dialog .checkbox .checkmark { display: none !important; }
+.ide-dialog .checkbox label { color: #dfe1e5 !important; padding: 0 !important; }
+.ide-dialog .checkbox label::before, .ide-dialog .checkbox label::after { display: none !important; }
+.ide-dlg-footer { display: flex !important; justify-content: flex-end; gap: 10px; padding: 18px 18px 16px; }
+.ide-dialog button.ide-dlg-btn {
+  width: auto !important; min-width: 72px; height: 30px !important; padding: 0 14px !important; margin: 0 !important;
+  background: #2b2d30 !important; color: #dfe1e5 !important; border: 1px solid #5a5d63 !important; border-radius: 4px !important;
+  line-height: 28px !important; cursor: pointer;
+}
+.ide-dialog button.ide-dlg-btn:hover { background: #393b40 !important; }
+.ide-dialog button.ide-dlg-primary { background: #3574f0 !important; border-color: #3574f0 !important; color: #fff !important; font-weight: 600 !important; }
+.ide-dialog button.ide-dlg-primary:hover { background: #4682fa !important; }
+.ide-dialog button.ide-dlg-gen { flex: none; min-width: 0; }
+body .ide-dialog, body .ide-dialog * { font-family: "Segoe UI", "Malgun Gothic", system-ui, sans-serif !important; box-sizing: border-box !important; }
+body .ide-dialog .ide-dlg-logo { font-family: "JetBrains Mono", Consolas, monospace !important; }
+.ide-dialog .checkbox { margin: 0 !important; padding: 0 !important; float: none !important; }
+.ide-dialog button.ide-dlg-primary { font-weight: 400 !important; }

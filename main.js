@@ -14,7 +14,9 @@ app.setPath('userData', process.env.IDE_SNAPSHOT
   ? path.join(app.getPath('temp'), 'workspace-ide-snapshot')   // dev screenshots never touch the real profile
   : path.join(app.getPath('appData'), 'workspace-ide'));
 
-const SKIN_CSS = fs.readFileSync(path.join(__dirname, 'skin', 'dc-skin.css'), 'utf8');
+const DC_CSS = fs.readFileSync(path.join(__dirname, 'skin', 'dc-skin.css'), 'utf8');
+const RD_CSS = fs.readFileSync(path.join(__dirname, 'skin', 'reddit-skin.css'), 'utf8');
+const skinFor = (host) => (/reddit\.com$/.test(host) ? RD_CSS : DC_CSS);
 const BOSS_KEY = 'CommandOrControl+Shift+F12';
 
 let win;
@@ -87,9 +89,9 @@ app.on('web-contents-created', (_e, contents) => {
     for (const f of contents.mainFrame.framesInSubtree) {
       if (f === contents.mainFrame) continue;
       try {
-        if (/dcinside\.com/.test(f.url)) {
+        if (/(dcinside|reddit)\.com$/.test(new URL(f.url).hostname)) {
           f.executeJavaScript(
-            `(()=>{if(document.getElementById('__ide_skin'))return;const s=document.createElement('style');s.id='__ide_skin';s.textContent=${JSON.stringify(SKIN_CSS)};(document.head||document.documentElement).appendChild(s);})()`
+            `(()=>{if(document.getElementById('__ide_skin'))return;const s=document.createElement('style');s.id='__ide_skin';s.textContent=${JSON.stringify(skinFor(new URL(f.url).hostname))};(document.head||document.documentElement).appendChild(s);})()`
           ).catch(() => {});
         }
       } catch (_) { /* cross-origin frame, ignore */ }
@@ -99,7 +101,7 @@ app.on('web-contents-created', (_e, contents) => {
 
 ipcMain.on('url:check', (e, url) => { e.returnValue = checkUrl(String(url)); });
 
-ipcMain.on('get-skin-css', (e) => { e.returnValue = SKIN_CSS; });
+ipcMain.on('get-skin-css', (e, host) => { e.returnValue = skinFor(host); });
 
 // Gallery search (same autocomplete API the site's header search box uses).
 // Done here in the main process so the renderer needs no cross-origin access.
