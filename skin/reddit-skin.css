@@ -113,3 +113,35 @@ body .ide-dialog, body .ide-dialog * { font-family: "Segoe UI", "Malgun Gothic",
 body .ide-dialog .ide-dlg-logo { font-family: "JetBrains Mono", Consolas, monospace !important; }
 .ide-dialog .checkbox { margin: 0 !important; padding: 0 !important; float: none !important; }
 .ide-dialog button.ide-dlg-primary { font-weight: 400 !important; }
+
+/* ---- post view: commit details, file panel, review comments ---- */
+.commentarea .tagline .score, .commentarea .tagline .numchildren { display: none !important; }
+.ide-rd-body {
+  border: 1px solid #393b40 !important; border-radius: 6px !important; margin: 14px 0 !important;
+  padding: 0 0 14px !important; overflow: hidden; max-width: none !important;
+}
+.ide-rd-body::before {
+  content: "≡  CHANGELOG.md"; display: block; padding: 6px 12px; margin-bottom: 14px; background: #2b2d30 !important;
+  border-bottom: 1px solid #393b40; color: #9da0a8; font: 12px "Segoe UI", sans-serif;
+}
+.ide-rd-body > * { margin-left: 18px !important; margin-right: 18px !important; }
+.ide-rd-body .md, .ide-rd-body .md * { line-height: 1.75 !important; }
+.ide-link-url { color: #56a8f5; font: 12.5px "JetBrains Mono", Consolas, monospace; user-select: text; margin: 4px 0 8px; word-break: break-all; }
+.thing.link .tagline > div { margin: 2px 0; }
+
+/* fold mode: media → one-line merge-conflict marker (same as dc-skin.css) */
+.ide-folded { display: none !important; }
+.ide-foldable { opacity: 1 !important; filter: none !important; cursor: zoom-out !important; }
+span.ide-fold {
+  display: inline-block !important; margin: 2px 0 !important; padding: 0 6px !important; cursor: pointer !important;
+  font: 12.5px/1.6 "JetBrains Mono", Consolas, monospace !important; background: #2b2d30 !important; border-radius: 3px;
+  white-space: nowrap; user-select: none;
+}
+span.ide-fold:hover { background: #393b40 !important; }
+span.ide-fold.ide-open { display: none !important; }
+span.ide-fold.ide-open[data-frame] { display: inline-block !important; }
+span.ide-fold.ide-open[data-frame] > i.ide-h { font-size: 0 !important; }
+span.ide-fold.ide-open[data-frame] > i.ide-h::after { content: "(click to fold)"; font-size: 12px; }
+span.ide-fold > b.ide-m { color: #e06c75 !important; font-weight: 600 !important; }
+span.ide-fold > b.ide-f { color: #5fb865 !important; font-weight: 400 !important; }
+span.ide-fold > i.ide-h { color: #6f737a !important; font-style: normal !important; }

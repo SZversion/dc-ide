@@ -59,7 +59,10 @@ function applySettings() {
 const FOLD_CSS = `.btn_imgcmtopen, .btn_imgcmt, .img_comment_toggle,
 .write_div img:not(.ide-foldable), .write_div video:not(.ide-foldable), .write_div iframe:not(.ide-foldable),
 .view_comment .written_dccon:not(.ide-foldable), .view_comment .coment_dccon_img img:not(.ide-foldable),
-.view_comment .coment_dccon_img video:not(.ide-foldable) { display: none !important; }`;
+.view_comment .coment_dccon_img video:not(.ide-foldable),
+.thing.link .expando img:not(.ide-foldable), .thing.link .expando video:not(.ide-foldable), .thing.link .expando iframe:not(.ide-foldable),
+.thing.link .usertext-body img:not(.ide-foldable), .thing.link .usertext-body video:not(.ide-foldable),
+.commentarea .usertext-body img:not(.ide-foldable), .commentarea .usertext-body video:not(.ide-foldable) { display: none !important; }`;
 
 // ---- 2b. fold mode: each media becomes a one-line "<<<<<<< HEAD:image_1.png" button.
 // Button click → media shown as the site shows it; media click → folded again.
@@ -67,6 +70,9 @@ const FOLD_CSS = `.btn_imgcmtopen, .btn_imgcmt, .img_comment_toggle,
 const FOLD_AREAS = [
   ['.write_div', 'img, video, iframe'],
   ['.view_comment', '.written_dccon, .coment_dccon_img img, .coment_dccon_img video'],
+  ['.thing.link .expando', 'img, video, iframe'],
+  ['.thing.link .usertext-body', 'img, video'],
+  ['.commentarea .usertext-body', 'img, video'],
 ];
 function foldMedia() {
   if (!settings || settings.media !== 'fold') return;
@@ -771,10 +777,94 @@ function rdList() {
   }
 }
 
+// old reddit post → commit details (+ review comments below)
+const rdStamp = (iso) => { const d = new Date(iso); return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`; };
+function rdView() {
+  const post = document.querySelector('#siteTable > .thing');
+  if (!post || post.dataset.ide || !/\/comments\//.test(location.pathname)) return;
+  post.dataset.ide = '1';
+  const id = (post.dataset.fullname || '').replace(/^t3_/, '');
+  const meta = document.createElement('div');
+  meta.className = 'ide-commit-meta';
+  meta.innerHTML = '<span class="k">commit</span> <span class="h"></span> <span class="ref">origin/RdPathofexile</span>';
+  const n = parseInt(id, 36);
+  meta.querySelector('.h').textContent = (rdHash(id) + shortHash(n + 7919) + shortHash(n + 104729)).slice(0, 20);
+  meta.querySelector('.h').title = id;
+  post.parentNode.insertBefore(meta, post);
+
+  // Author / Date / stats lines (tagline text nodes — "submitted", "by" — are dropped)
+  const tag = post.querySelector('.tagline');
+  if (tag) {
+    for (const t of tag.childNodes) if (t.nodeType === 3) t.nodeValue = '';
+    const au = document.createElement('div');
+    const a = tag.querySelector('a.author') || document.createElement('span');
+    if (!a.parentNode) a.textContent = post.dataset.author || '[deleted]';
+    au.append('Author: ', avatarFor(a.textContent), a, ...tag.querySelectorAll('.userattrs, .flair'));
+    tag.insertBefore(au, tag.firstChild);
+    const time = tag.querySelector('time[datetime]');
+    if (time) { time.classList.remove('live-timestamp'); time.textContent = 'Date: ' + rdStamp(time.getAttribute('datetime')); }
+    const st = document.createElement('div');
+    st.textContent = `★ ${post.dataset.score || 0} · ${post.dataset.commentsCount || 0} comments`;
+    tag.append(st);
+  }
+
+  // external link post: title is plain text, the address is shown (selectable, not clickable)
+  const dom = post.dataset.domain || '';
+  const a = post.querySelector('p.title a.title');
+  if (a && !/^self\./.test(dom) && !/^(i\.redd\.it|v\.redd\.it|(.*\.)?reddit\.com)$/.test(dom) && post.dataset.url) {
+    const s = document.createElement('span');
+    s.className = 'title';
+    s.textContent = a.textContent;
+    a.replaceWith(s);
+    const u = document.createElement('div');
+    u.className = 'ide-link-url';
+    u.textContent = post.dataset.url;
+    s.closest('p.title').after(u);
+  }
+  post.querySelector('.expando')?.classList.add('ide-rd-body');
+}
+
+function rdComments() {
+  const area = document.querySelector('.commentarea');
+  if (!area) return;
+  for (const c of area.querySelectorAll('.thing.comment')) {
+    if (c.dataset.ide) continue;
+    c.dataset.ide = '1';
+    const tag = c.querySelector(':scope > .entry > .tagline');
+    if (!tag) continue;
+    const au = tag.querySelector('a.author');
+    const av = avatarFor(c.dataset.author || '[deleted]');
+    if (au) tag.insertBefore(av, au); else tag.append(av);
+    const time = tag.querySelector('time[datetime]');
+    if (time) {
+      const d = new Date(time.getAttribute('datetime'));
+      time.classList.remove('live-timestamp');
+      time.textContent = `${pad(d.getMonth() + 1)}/${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    }
+  }
+  const total = document.querySelector('#siteTable > .thing')?.dataset.commentsCount || area.querySelectorAll('.thing.comment').length;
+  const h = area.querySelector('.panestack-title .title');
+  if (h && h.textContent !== `Review comments (${total})`) h.textContent = `Review comments (${total})`;
+  const menu = area.querySelector('.menuarea');
+  if (menu) relabel(menu, { 'best (suggested)': 'Suggested', best: 'Suggested', top: 'Top', new: 'Newest', old: 'Oldest' });
+  area.querySelectorAll('.morecomments a.button').forEach((b) => relabel(b, { 'load more comments': 'Load more…' }));
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   injectSkin();
   watchAlarms();
-  if (isRd) rdList();
+  if (isRd) {
+    rdList(); rdView(); rdComments();
+    const ca = document.querySelector('.commentarea');
+    if (ca) {
+      let pending = false;
+      new MutationObserver(() => {
+        if (pending) return;
+        pending = true;
+        requestAnimationFrame(() => { pending = false; rdComments(); foldMedia(); });
+      }).observe(ca, { childList: true, subtree: true });
+    }
+  }
   sendMeta();          // must read the real gallery name before disguiseList() renames it
   disguiseList();
   disguiseView();
