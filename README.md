@@ -8,6 +8,7 @@ Because it is the real site, everything works as usual: login, writing posts, im
 ```
 npm install
 npm start
+npm test   # node:test, url rules
 ```
 
 ## What looks like what
@@ -52,6 +53,18 @@ The real form fields and submit button are reused, so login works exactly as on 
   menu 홈/게시물/댓글/스크랩/방명록 = Overview/Commits/Review comments/Stash/Discussions.
   Top link bar, visitor counter and calendar are hidden.
 
+### Upstream repository (RdPathofexile)
+A second source, the r/pathofexile community on `old.reddit.com` (login required, read-only), is dressed the same way.
+- Project tree › `com.workspace.modules` › **RdPathofexileRepository** (`findAll()` = hot, `findRecommended()` = top this week, `findPinned()` = stickied);
+  tabs are named `RdPathofexileRepository.java` / `RdPathofexileQueryDsl.java` / `RdPathofexileEntity<id>.java`. The real name is only a hover tooltip.
+- List = Git Log (All commits / Starred / Pinned), post = commit + review comments, same as above.
+  Ads, sidebar, thumbnails and vote arrows are hidden from the first paint; the comment box, vote, save and report controls are hidden (read-only).
+- Media (images, galleries, videos, YouTube embeds, comment images) follows the Images & videos setting; Fold shows `<<<<<<< HEAD:` markers and hides media while the page loads.
+- Login: **External Libraries › Auth: rd-session-config** opens the sign-in disguised as the "GitLab 계정 로그인" dialog.
+  If a submit stays on the login page (~5s), or a captcha / 2FA step appears, the site's own screen is shown instead. Google/Apple sign-in open as real popups.
+- Only `*.dcinside.com` and `old.reddit.com` load in the app (`www.reddit.com` paths are rewritten to `old.reddit.com`).
+  External links are not opened inside the app; the address bar just shows a "Blocked" balloon.
+
 ## Notifications
 dcinside's PC page polls its alarm API every ~60s and shows a pop-up. The app hides that pop-up and re-shows it as an IDE balloon + Notifications log entry (and optionally a Windows toast saying "Build completed").
 It needs: logged in, at least one tab open, and dcinside's alarm setting turned on.
@@ -79,5 +92,7 @@ It needs: logged in, at least one tab open, and dcinside's alarm setting turned 
 - `renderer/` – IDE shell (tabs, tree, notifications, boss mode)
 - `webview-preload.js` – runs in the dcinside page: injects skin, forwards alarms and shortcuts
 - `skin/dc-skin.css` – the Darcula skin for dcinside pages (edit this if the site layout changes)
+- `skin/reddit-skin.css` – the same for old.reddit.com pages (picked by host)
+- `url-rules.js` – which URLs may load, get rewritten or blocked (covered by `npm test`)
 
 Data (login cookies, settings) is stored in `%APPDATA%\workspace-ide`.
