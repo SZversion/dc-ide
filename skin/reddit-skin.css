@@ -61,7 +61,8 @@ span.ide-avatar {
 /* login page (new-reddit markup, shadow DOM): dark base; Task 6 adds html.ide-rd-login */
 html.ide-rd-login, html.ide-rd-login body { background: #1e1f22 !important; color-scheme: dark; }
 /* reddit's form stays in the DOM for submit; opacity too because some reddit buttons force visibility: visible */
-html.ide-rd-login body > :not(.ide-dialog) { visibility: hidden !important; opacity: 0 !important; }
+/* …but never the reCAPTCHA image challenge (bframe), which Google appends as its own body child */
+html.ide-rd-login body > :not(.ide-dialog):not(:has(iframe[src*="recaptcha"][src*="bframe"])) { visibility: hidden !important; opacity: 0 !important; }
 .ide-dialog [data-slot="sso"]:not(:empty) { padding: 6px 18px 0; }
 
 /* ---- sign-in dialog: identical to dc-skin.css ---- */

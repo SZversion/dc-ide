@@ -889,24 +889,39 @@ function rdLogin() {
     slot('id').appendChild(id);
     slot('pw').insertBefore(pw, slot('pw').firstChild);
     const sso = document.querySelector('auth-flow-sso-buttons');
+    const ssoHome = sso && [sso.parentNode, sso.nextSibling];
     if (sso) slot('sso').appendChild(sso);
     const submit = Object.assign(document.createElement('button'), { type: 'button', className: 'ide-dlg-btn ide-dlg-primary', textContent: '로그인' });
     slot('buttons').insertBefore(submit, slot('buttons').firstChild);
 
+    // Errors (wrong password, rate limit, …) render in reddit's hidden form, so when a submit doesn't leave the
+    // login step, drop the disguise for good and let reddit's own screen and message show.
+    let dropped = false;
+    let busy = false;
+    const drop = () => {
+      dropped = true;
+      dlg.hidden = true;
+      document.documentElement.classList.remove('ide-rd-login');
+      if (sso) ssoHome[0].insertBefore(sso, ssoHome[1]?.parentNode === ssoHome[0] ? ssoHome[1] : null);  // social sign-in back on reddit's own screen
+    };
     const setValue = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set;
     const send = () => {
       const els = find();
-      if (!els) return;
+      if (!els || busy) return;
+      busy = true;
       for (const [input, v] of [[els.user, id.value], [els.pass, pw.value]]) {
         setValue.call(input, v);
         for (const t of ['input', 'change']) input.dispatchEvent(new Event(t, { bubbles: true, composed: true }));
       }
-      // reddit validates (debounced) and only then enables its button; give up after 3 s like a disabled click
+      // reddit validates (debounced) and only then enables its button; give up after 3 s
       const t1 = Date.now();
       const go = () => {
         const b = find()?.btn;
-        if (b && !b.disabled) b.click();
-        else if (Date.now() - t1 < 3000) setTimeout(go, 50);
+        if (b && !b.disabled) {
+          b.click();
+          setTimeout(() => { busy = false; if (mgr.getAttribute('step-name') === 'login') drop(); }, 5000);
+        } else if (Date.now() - t1 < 3000) setTimeout(go, 50);
+        else drop();
       };
       go();
     };
@@ -917,6 +932,7 @@ function rdLogin() {
     document.title = 'GitLab 계정 로그인';
     // captcha / 2FA / email-code steps: hide the dialog and show reddit's own screen
     const sync = () => {
+      if (dropped) return;
       const on = mgr.getAttribute('step-name') === 'login';
       dlg.hidden = !on;
       document.documentElement.classList.toggle('ide-rd-login', on);
