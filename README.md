@@ -56,14 +56,13 @@ The real form fields and submit button are reused, so login works exactly as on 
 ### Upstream repository (RdPathofexile)
 A second source, the r/pathofexile community on `old.reddit.com` (login required, read-only), is dressed the same way.
 - Project tree › `com.workspace.modules` › **RdPathofexileRepository** (`findAll()` = hot, `findRecommended()` = top this week, `findPinned()` = stickied);
-  tabs are named `RdPathofexileRepository.java` / `RdPathofexileQueryDsl.java` / `RdPathofexileEntity<id>.java`. The real name is only a hover tooltip.
-- List = Git Log (All commits / Starred / Pinned), post = commit + review comments, same as above.
-  Ads, sidebar, thumbnails and vote arrows are hidden from the first paint; the comment box, vote, save and report controls are hidden (read-only).
-- Media (images, galleries, videos, YouTube embeds, comment images) follows the Images & videos setting; Fold shows `<<<<<<< HEAD:` markers and hides media while the page loads.
-- Login: **External Libraries › Auth: rd-session-config** opens the sign-in disguised as the "GitLab 계정 로그인" dialog.
-  If a submit stays on the login page (~5s), or a captcha / 2FA step appears, the site's own screen is shown instead. Google/Apple sign-in open as real popups.
-- Only `*.dcinside.com` and `old.reddit.com` load in the app (`www.reddit.com` paths are rewritten to `old.reddit.com`).
-  External links are not opened inside the app; the address bar just shows a "Blocked" balloon.
+  tabs are `RdPathofexileRepository.java` / `…QueryDsl.java` / `…Entity<id>.java`. The real name only appears as a hover tooltip.
+- List = Git Log, post = commit + review comments. Ads, sidebar, thumbnails, vote arrows and the comment/vote/save/report controls are hidden from the first paint.
+- Media follows the Images & videos setting (Fold: `<<<<<<< HEAD:` markers, hidden while loading).
+- Login: **External Libraries › Auth: rd-session-config** shows the sign-in as the "GitLab 계정 로그인" dialog;
+  captcha / 2FA steps, or a submit that stays on the login page (~5s), fall back to the site's own screen. Google/Apple sign-in open as real popups.
+- Only dcinside, `old.reddit.com` and the reddit/Google/Apple sign-in pages load; other `www.reddit.com` links open as `old.reddit.com`.
+  Any other external link does nothing except a "Blocked" balloon in the address bar.
 
 ## Notifications
 dcinside's PC page polls its alarm API every ~60s and shows a pop-up. The app hides that pop-up and re-shows it as an IDE balloon + Notifications log entry (and optionally a Windows toast saying "Build completed").
