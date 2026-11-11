@@ -714,36 +714,16 @@ function rdList() {
     if (a && row.dataset.permalink) a.setAttribute('href', row.dataset.permalink);
   }
 
-  // tabs: hot → All commits, top → Starred, plus Pinned
-  const tabs = document.querySelector('#header .tabmenu');
-  if (tabs) {
-    for (const a of tabs.querySelectorAll('a.choice')) {
-      const top = /\/top\/?$/.test(new URL(a.href).pathname);
-      if (top) a.href = a.href.split('?')[0] + '?t=week';
-      a.title = a.textContent.trim();
-      a.textContent = top ? 'Starred' : 'All commits';
-    }
-    const hot = [...tabs.querySelectorAll('a.choice')].find((a) => a.textContent === 'All commits');
-    if (hot) {
-      const li = hot.parentElement.cloneNode(true);
-      li.classList.remove('selected');
-      const pa = li.querySelector('a');
-      pa.href = hot.href.split('#')[0] + '#pinned'; pa.textContent = 'Pinned';
-      tabs.appendChild(li);
-    }
+  // tabs: new → All commits (first, like dc's 전체글), hot → Active, top (this week) → Starred; the rest are hidden by CSS
+  for (const a of document.querySelectorAll('#header .tabmenu a.choice')) {
+    const p = new URL(a.href).pathname;
+    const label = /\/top\/?$/.test(p) ? 'Starred' : /\/new\/?$/.test(p) ? 'All commits' : /\/r\/[^/]+\/?$/.test(p) ? 'Active' : '';
+    if (!label) continue;
+    if (label === 'Starred') a.href = a.href.split('?')[0] + '?t=week';
+    a.title = a.textContent.trim();
+    a.textContent = label;
+    if (label === 'All commits') a.parentElement.parentElement.prepend(a.parentElement);
   }
-  const setMode = () => {
-    const pinned = location.hash === '#pinned';
-    document.documentElement.classList.toggle('ide-rd-pinned-mode', pinned);
-    if (!tabs) return;
-    const lis = [...tabs.querySelectorAll('li')];
-    const pin = lis.find((li) => li.textContent.trim() === 'Pinned');
-    if (!pin) return;
-    if (pinned) lis.forEach((li) => li.classList.remove('selected'));
-    pin.classList.toggle('selected', pinned);
-  };
-  setMode();
-  window.addEventListener('hashchange', setMode);
 
   const pn = document.querySelector('#header .pagename a');
   if (pn) {

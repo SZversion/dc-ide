@@ -55,7 +55,7 @@ The real form fields and submit button are reused, so login works exactly as on 
 
 ### Upstream repository (RdPathofexile)
 A second source, the r/pathofexile community on `old.reddit.com` (login required, read-only), is dressed the same way.
-- Project tree › `com.workspace.modules` › **RdPathofexileRepository** (`findAll()` = hot, `findRecommended()` = top this week, `findPinned()` = stickied);
+- Project tree › `com.workspace.modules` › **RdPathofexileRepository** (`findAll()` = new, `findActive()` = hot, `findRecommended()` = top this week; list tabs All commits / Active / Starred, stickied posts hidden);
   tabs are `RdPathofexileRepository.java` / `…QueryDsl.java` / `…Entity<id>.java`. The real name only appears as a hover tooltip.
 - List = Git Log, post = commit + review comments. Ads, sidebar, thumbnails, vote arrows and the comment/vote/save/report controls are hidden from the first paint.
 - Media follows the Images & videos setting (Fold: `<<<<<<< HEAD:` markers, hidden while loading).

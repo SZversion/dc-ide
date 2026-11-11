@@ -39,7 +39,7 @@ function parseRd(url) {
   let u; try { u = new URL(url); } catch { return null; }
   if (u.hostname !== 'old.reddit.com' || !/^\/r\/pathofexile(\/|$)/i.test(u.pathname)) return null;
   const m = u.pathname.match(/\/comments\/(\w+)/);
-  return { page: m ? 'view' : 'lists', id: m ? m[1] : null, best: /\/top\/?$/i.test(u.pathname), pinned: u.hash === '#pinned' };
+  return { page: m ? 'view' : 'lists', id: m ? m[1] : null, best: /\/top\/?$/i.test(u.pathname), newest: /\/new\/?$/i.test(u.pathname) };
 }
 const gallUrl = (g, page = 'lists', extra = '') =>
   `https://gall.dcinside.com/${KIND_PREFIX[g.kind] || ''}board/${page}/?id=${encodeURIComponent(g.id)}${extra}`;
@@ -251,13 +251,13 @@ function renderTree() {
         const rdSel = rd && rd.page === 'lists';
         add(d3, {
           label: 'RdPathofexileRepository.java', ico: 'C', icoClass: 'java', expandable: true, open: expanded.has('rd:pathofexile'),
-          selected: rdSel && !rd.best && !rd.pinned, tooltip: 'r/pathofexile',
-          onToggle: () => toggleExpand('rd:pathofexile'), onOpen: (nt) => open(RD_HOME, nt),
+          selected: rdSel && rd.newest, tooltip: 'r/pathofexile',
+          onToggle: () => toggleExpand('rd:pathofexile'), onOpen: (nt) => open(RD_HOME + 'new/', nt),
         });
         if (expanded.has('rd:pathofexile')) {
-          add(d3 + 1, { label: 'findAll()', ico: 'm', icoClass: 'cls', selected: rdSel && !rd.best && !rd.pinned, onOpen: (nt) => open(RD_HOME, nt) });
+          add(d3 + 1, { label: 'findAll()', ico: 'm', icoClass: 'cls', selected: rdSel && rd.newest, onOpen: (nt) => open(RD_HOME + 'new/', nt) });
+          add(d3 + 1, { label: 'findActive()', ico: 'm', icoClass: 'cls', selected: rdSel && !rd.best && !rd.newest, onOpen: (nt) => open(RD_HOME, nt) });
           add(d3 + 1, { label: 'findRecommended()', ico: 'm', icoClass: 'cls', selected: rdSel && rd.best, onOpen: (nt) => open(RD_HOME + 'top/?t=week', nt) });
-          add(d3 + 1, { label: 'findPinned()', ico: 'm', icoClass: 'cls', selected: rdSel && rd.pinned, onOpen: (nt) => open(RD_HOME + '#pinned', nt) });
         }
         if (!galleries.length) add(d3, { label: '(Ctrl+N or Shift×2 to find a gallery)', ico: '' });
         galleries.forEach((g) => gallNode(g, d3, true));

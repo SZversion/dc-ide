@@ -26,16 +26,16 @@ iframe { color-scheme: dark; }
 .thing.promoted, .promotedlink, [data-promoted="true"], .ad-container, #ad_main, .premium-banner-outer, .infobar,
 .thumbnail, .expando-button, .midcol, .rank, .flat-list.buttons li:not(.first),
 .commentarea > form.usertext, .commentarea .usertext-buttons, .reportform,
-.tabmenu li:has(a[href$="/new/"]), .tabmenu li:has(a[href$="/rising/"]),
+.tabmenu li:has(a[href$="/rising/"]),
 .tabmenu li:has(a[href$="/controversial/"]), .tabmenu li:has(a[href*="/wiki/"]),
-.ide-rd-row.ide-pinned, html.ide-rd-pinned-mode .ide-rd-row:not(.ide-pinned), .ide-rd-row .domain { display: none !important; }
+.ide-rd-row.ide-pinned, .ide-rd-row .domain { display: none !important; }
 
 /* wide layout: the content fills the editor pane */
 .content { margin: 0 !important; padding: 0 16px !important; max-width: none !important; }
 #header { border: 0 !important; background: transparent !important; }
 
 /* classes added by webview-preload.js (rows / commit view) */
-html.ide-rd-pinned-mode .ide-rd-row.ide-pinned { display: flex !important; }
+.ide-rd-row .tagline .author { margin-left: .5em; }
 .ide-rd-row .entry { display: flex; align-items: center; gap: 12px; flex: 1; min-width: 0; margin: 0 !important; }
 .ide-rd-row .top-matter { display: contents; }
 .ide-rd-row p.title { flex: 1; min-width: 0; margin: 0 !important; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
