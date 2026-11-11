@@ -613,3 +613,9 @@ body .ide-dialog .ide-dlg-logo { font-family: "JetBrains Mono", Consolas, monosp
 .gallog_wrap .top_bar { margin-bottom: 4px !important; }
 .gallog_wrap .wrap_left { margin-bottom: 10px !important; }
 .gallog_wrap .gallog_cont .cont_head .tit::before { font-size: 12px; }
+
+/* ====================================================================
+   No user profile pictures anywhere (gallog photo slot, any leftover avatars)
+   ==================================================================== */
+.gallog_wrap .photo, .gallog_wrap .photo.sp_img, .gallog_wrap #profile_img, span.ide-avatar { display: none !important; }
+.cmt_txtbox { padding-left: 0 !important; }
