@@ -212,7 +212,8 @@ span.ide-avatar {
   content: "≡  CHANGELOG.md"; display: block; padding: 6px 12px; background: #2b2d30 !important;
   border-bottom: 1px solid #393b40; color: #9da0a8; font: 12px "Segoe UI", sans-serif;
 }
-.write_div { padding: 14px 18px 18px 18px !important; border-left: 3px solid #2b2d30 !important; }
+/* border-box + max-width: dc gives .write_div a fixed px width; our padding/border must fit inside it, not push it under the scrollbar */
+.write_div { padding: 14px 18px 18px 18px !important; border-left: 3px solid #2b2d30 !important; box-sizing: border-box !important; max-width: 100% !important; }
 .write_div, .write_div * { color: #bcbec4 !important; line-height: 1.75 !important; }
 .write_div a, .write_div a * { color: #56a8f5 !important; }
 
@@ -303,14 +304,15 @@ iframe { color-scheme: dark; }
 
 
 /* scrollbars */
-::-webkit-scrollbar { width: 10px; height: 10px; background: #1e1f22; }
+::-webkit-scrollbar { width: 8px; height: 8px; background: #1e1f22; }
 ::-webkit-scrollbar-thumb { background: #4e5157; border-radius: 5px; border: 2px solid #1e1f22; }
 ::selection { background: #214283 !important; color: inherit !important; }
 
 /* git-log fixes */
 .page_head h2, .page_head h2 a { letter-spacing: normal !important; }
 .select_area a { white-space: nowrap !important; }
-.wrap_inner { overflow-x: hidden !important; }
+/* clip, not hidden: overflow-x:hidden turns overflow-y into auto and adds a second, page-tall scrollbar */
+.wrap_inner { overflow-x: clip !important; overflow-y: visible !important; }
 table.gall_list td.gall_writer .addbox, table.gall_list td.gall_writer > div { display: inline !important; }
 /* the site sets min-widths on its wrappers; make them follow the window */
 html, body, #top, .dcwrap, .wrap_inner, #container { min-width: 0 !important; max-width: 100% !important; }
