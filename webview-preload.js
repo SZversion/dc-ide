@@ -57,14 +57,15 @@ function applySettings() {
 // fold mode only: drop the site's per-image comment buttons ("댓글 열기", hover "이미지 댓글 ON"); the comment box stays
 // media not yet turned into a fold marker stays hidden, so nothing shows while the page is still loading
 const FOLD_CSS = `.btn_imgcmtopen, .btn_imgcmt, .img_comment_toggle,
-.write_div img:not(.ide-foldable), .write_div video:not(.ide-foldable),
+.write_div img:not(.ide-foldable), .write_div video:not(.ide-foldable), .write_div iframe:not(.ide-foldable),
 .view_comment .written_dccon:not(.ide-foldable), .view_comment .coment_dccon_img img:not(.ide-foldable),
 .view_comment .coment_dccon_img video:not(.ide-foldable) { display: none !important; }`;
 
 // ---- 2b. fold mode: each media becomes a one-line "<<<<<<< HEAD:image_1.png" button.
 // Button click → media shown as the site shows it; media click → folded again.
+// Embedded players (YouTube iframes) swallow clicks, so their button stays visible and toggles instead.
 const FOLD_AREAS = [
-  ['.write_div', 'img, video'],
+  ['.write_div', 'img, video, iframe'],
   ['.view_comment', '.written_dccon, .coment_dccon_img img, .coment_dccon_img video'],
 ];
 function foldMedia() {
@@ -72,15 +73,16 @@ function foldMedia() {
   for (const [areaSel, sel] of FOLD_AREAS) for (const area of document.querySelectorAll(areaSel)) {
     for (const el of area.querySelectorAll(sel)) {
       if (el.classList.contains('ide-foldable') || (el.tagName !== 'VIDEO' && el.closest('video'))) continue;
-      const kind = el.matches('.written_dccon, .coment_dccon_img *') ? 'dccon' : el.tagName === 'VIDEO' ? 'video' : 'image';
+      const kind = el.matches('.written_dccon, .coment_dccon_img *') ? 'dccon' : el.tagName === 'VIDEO' || el.tagName === 'IFRAME' ? 'video' : 'image';
       // shortcut: dcinside image URLs carry no extension, so only an explicit .gif is detected
-      const ext = el.tagName === 'VIDEO' ? 'mp4' : /\.gif\b/i.test((el.currentSrc || el.src || '') + (el.alt || '')) ? 'gif' : 'png';
+      const ext = el.tagName === 'IFRAME' ? 'embed' : el.tagName === 'VIDEO' ? 'mp4' : /\.gif\b/i.test((el.currentSrc || el.src || '') + (el.alt || '')) ? 'gif' : 'png';
       const n = area.querySelectorAll(`.ide-fold[data-kind="${kind}"]`).length + 1;
       const btn = document.createElement('span');
       btn.className = 'ide-fold';
       btn.dataset.kind = kind;
       btn.setAttribute('role', 'button');
       btn.tabIndex = 0;
+      if (el.tagName === 'IFRAME') btn.dataset.frame = '1';
       btn.innerHTML = '<b class="ide-m">&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD:</b><b class="ide-f"></b> <i class="ide-h">(click to resolve)</i>';
       btn.querySelector('.ide-f').textContent = `${kind}_${n}.${ext}`;
       el.classList.add('ide-foldable');
@@ -92,8 +94,11 @@ function foldMedia() {
 function setFolded(el, folded) {
   el.classList.toggle('ide-folded', folded);
   const btn = el.previousElementSibling;
+  const wasOpen = btn && btn.classList.contains('ide-open');
   if (btn && btn.classList.contains('ide-fold')) btn.classList.toggle('ide-open', !folded);
   if (el.tagName === 'VIDEO') { if (folded) el.pause(); else if (el.autoplay || el.loop) el.play().catch(() => {}); }
+  // a hidden iframe keeps playing; reloading it stops playback (only if the user had opened it)
+  if (el.tagName === 'IFRAME' && folded && wasOpen) el.src = el.src;
 }
 function unfoldAll() {
   document.querySelectorAll('.ide-fold').forEach((b) => b.remove());
@@ -112,7 +117,7 @@ function onFoldClick(e) {
   if (e.type === 'keydown' && !(btn && (e.key === 'Enter' || e.key === ' '))) return;
   e.preventDefault();
   e.stopImmediatePropagation();
-  setFolded(media, !btn);
+  setFolded(media, btn ? btn.classList.contains('ide-open') : true);
 }
 window.addEventListener('click', onFoldClick, true);
 window.addEventListener('keydown', onFoldClick, true);

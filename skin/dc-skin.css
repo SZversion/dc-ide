@@ -55,7 +55,7 @@ ins.adsbygoogle, .banner_box, .bnr_wrap, .dc_banner, .dcwrap_sky, .rtbAlarmPopup
 .con_banner, .writing_banbox, .kakao_ad_area, [class*="_ad_area"], [id*="google_ads"],
 iframe[id^="criteo"], .gallview_contents iframe:not(.write_div iframe), .rcont_imgtxt_box.dcissue,
 #hdline_ban,
-#zzbang_ad /* in-body banner slot (addc NetInsight / kakao / adsense), e.g. game galleries */
+#zzbang_div /* in-body banner slot (addc / kakao / adsense) + the gallery filler image (#zzbang_img) dc shows when no ad fills it */
 { display: none !important; }
 
 /* wide layout: drop the 1160px centring so it fills the editor pane */
@@ -224,6 +224,9 @@ span.ide-fold {
 }
 span.ide-fold:hover { background: #393b40 !important; }
 span.ide-fold.ide-open { display: none !important; }
+span.ide-fold.ide-open[data-frame] { display: inline-block !important; }  /* iframe: button is the only way to fold again */
+span.ide-fold.ide-open[data-frame] > i.ide-h { font-size: 0 !important; }
+span.ide-fold.ide-open[data-frame] > i.ide-h::after { content: "(click to fold)"; font-size: 12px; }
 span.ide-fold > b.ide-m { color: #e06c75 !important; font-weight: 600 !important; }
 span.ide-fold > b.ide-f { color: #5fb865 !important; font-weight: 400 !important; }
 span.ide-fold > i.ide-h { color: #6f737a !important; font-style: normal !important; }
