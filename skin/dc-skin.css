@@ -100,6 +100,8 @@ table.gall_list tbody tr.crt td, table.gall_list tbody tr.ide-sel td { backgroun
 
 /* rows that only exist on the community (notice / AD / survey) */
 table.gall_list tbody tr.ide-pinned, table.gall_list tbody tr.ide-ad { display: none !important; }
+/* AD / survey rows lack .us-post: hide them from the first paint, before webview-preload.js tags them */
+table.gall_list tbody tr.ub-content:not(.us-post):not([data-type="icon_notice"]) { display: none !important; }
 
 
 /* column order & widths */

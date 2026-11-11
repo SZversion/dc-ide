@@ -55,7 +55,11 @@ function applySettings() {
   if (settings.media === 'fold') foldMedia(); else unfoldAll();
 }
 // fold mode only: drop the site's per-image comment buttons ("댓글 열기", hover "이미지 댓글 ON"); the comment box stays
-const FOLD_CSS = '.btn_imgcmtopen, .btn_imgcmt, .img_comment_toggle { display: none !important; }';
+// media not yet turned into a fold marker stays hidden, so nothing shows while the page is still loading
+const FOLD_CSS = `.btn_imgcmtopen, .btn_imgcmt, .img_comment_toggle,
+.write_div img:not(.ide-foldable), .write_div video:not(.ide-foldable),
+.view_comment .written_dccon:not(.ide-foldable), .view_comment .coment_dccon_img img:not(.ide-foldable),
+.view_comment .coment_dccon_img video:not(.ide-foldable) { display: none !important; }`;
 
 // ---- 2b. fold mode: each media becomes a one-line "<<<<<<< HEAD:image_1.png" button.
 // Button click → media shown as the site shows it; media click → folded again.
@@ -112,8 +116,19 @@ function onFoldClick(e) {
 }
 window.addEventListener('click', onFoldClick, true);
 window.addEventListener('keydown', onFoldClick, true);
-ipcRenderer.on('settings', (_e, s) => { settings = s || {}; applySettings(); });
+ipcRenderer.on('settings', (_e, s) => {
+  settings = s || {};
+  try { localStorage.setItem('__ide_media', settings.media || ''); } catch { /* storage blocked */ }
+  applySettings();
+});
 ipcRenderer.sendToHost('need-settings');
+// Host settings arrive async; until then use the last mode (cached in this origin's storage) from the first paint.
+try { settings = { media: localStorage.getItem('__ide_media') || 'fold' }; } catch { settings = { media: 'fold' }; }
+if (document.documentElement) applySettings();
+else {
+  const early = new MutationObserver(() => { if (document.documentElement) { early.disconnect(); applySettings(); } });
+  early.observe(document, { childList: true });
+}
 document.addEventListener('DOMContentLoaded', applySettings);
 
 // ---- 3. capture the site's own alarm pop-ups (comment / reply alerts on my posts)
