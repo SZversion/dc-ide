@@ -69,7 +69,9 @@ const FOLD_CSS = `.btn_imgcmtopen, .btn_imgcmt, .img_comment_toggle,
 .view_comment .coment_dccon_img video:not(.ide-foldable),
 .thing.link .expando img:not(.ide-foldable), .thing.link .expando video:not(.ide-foldable), .thing.link .expando iframe:not(.ide-foldable),
 .thing.link .usertext-body img:not(.ide-foldable), .thing.link .usertext-body video:not(.ide-foldable),
-.commentarea .usertext-body img:not(.ide-foldable), .commentarea .usertext-body video:not(.ide-foldable) { display: none !important; }`;
+.commentarea .usertext-body img:not(.ide-foldable), .commentarea .usertext-body video:not(.ide-foldable) { display: none !important; }
+/* dc keeps .imgwrap display:none until it sees the image load at full size, which never happens while it's folded */
+.write_div .imgwrap:has(> .ide-fold) { display: inline-block !important; }`;
 
 // ---- 2b. fold mode: each media becomes a one-line "<<<<<<< HEAD:image_1.png" button.
 // Button click → media shown as the site shows it; media click → folded again.

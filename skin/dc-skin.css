@@ -85,7 +85,8 @@ iframe[id^="criteo"], .gallview_contents iframe:not(.write_div iframe), .rcont_i
 
 /* list uses the IDE's UI font, not monospace */
 table.gall_list, table.gall_list * { font-family: "Segoe UI", "Malgun Gothic", system-ui, sans-serif !important; }
-table.gall_list { border: 0 !important; margin-top: 0 !important; }
+/* block, not table: a table grows to its rows' text width instead of letting the columns shrink */
+table.gall_list { display: block !important; width: 100% !important; border: 0 !important; margin-top: 0 !important; }
 table.gall_list colgroup, table.gall_list thead { display: none !important; }
 table.gall_list tbody { display: block !important; }
 table.gall_list tbody tr {
@@ -106,10 +107,11 @@ table.gall_list tbody tr.ub-content:not(.us-post):not([data-type="icon_notice"])
 
 /* column order & widths */
 td.gall_subject { order: 1; flex: none; padding-right: 0 !important; }
-td.gall_tit     { order: 2; flex: 1 1 auto; min-width: 0; }
-td.gall_writer  { order: 3; flex: 0 0 150px; }
-td.gall_date    { order: 4; flex: 0 0 130px; }
-td.gall_num     { order: 5; flex: 0 0 76px; }
+/* narrow window: the title keeps ~20 Korean chars (12.5px, 1em each); author/date/hash shrink first */
+td.gall_tit     { order: 2; flex: 1 1 auto; min-width: 20em; }
+td.gall_writer  { order: 3; flex: 0 1 150px; min-width: 48px; }
+td.gall_date    { order: 4; flex: 0 1 130px; min-width: 96px; }
+td.gall_num     { order: 5; flex: 0 1 76px; min-width: 0; }
 td.gall_count, td.gall_recommend { display: none !important; }
 
 /* commit graph column (SVG drawn by webview-preload.js) */
