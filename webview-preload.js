@@ -196,13 +196,17 @@ function fmtDate(td) {
   const full = td.getAttribute('title') || '';           // "2026-11-06 15:49:54"
   const m = full.match(/^(\d{4})-(\d\d)-(\d\d) (\d\d):(\d\d)/);
   if (!m) return null;
+  return fmtStamp(new Date(+m[1], +m[2] - 1, +m[3], +m[4], +m[5]));
+}
+function fmtStamp(d) {
   const now = new Date();
-  const d = new Date(+m[1], +m[2] - 1, +m[3]);
+  const day = new Date(d.getFullYear(), d.getMonth(), d.getDate());
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  const diff = Math.round((today - d) / 864e5);
-  if (diff === 0) return `Today ${m[4]}:${m[5]}`;
-  if (diff === 1) return `Yesterday ${m[4]}:${m[5]}`;
-  return `${m[1]}.${m[2]}.${m[3]}, ${m[4]}:${m[5]}`;
+  const diff = Math.round((today - day) / 864e5);
+  const hm = `${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  if (diff === 0) return `Today ${hm}`;
+  if (diff === 1) return `Yesterday ${hm}`;
+  return `${d.getFullYear()}.${pad(d.getMonth() + 1)}.${pad(d.getDate())}, ${hm}`;
 }
 
 // ---- commit graph: lanes that fork and merge, drawn as one SVG per row.
@@ -216,12 +220,8 @@ function rng(seed) {
   return () => { s ^= s << 13; s >>>= 0; s ^= s >>> 17; s ^= s << 5; s >>>= 0; return s / 4294967296; };
 }
 
-function drawGraph(table) {
-  const rows = [...table.querySelectorAll('tbody tr')]
-    .filter((tr) => !tr.classList.contains('ide-pinned') && !tr.classList.contains('ide-ad'));
-  if (!rows.length || rows[0].querySelector('td.ide-graph')) return;
-
-  const rand = rng(Number(rows[0].dataset.no) || 7);
+function drawGraph(rows, seed, place) {
+  const rand = rng(seed);
   let colorSeq = 0;
   const newLane = () => ({ color: GRAPH_COLORS[colorSeq++ % GRAPH_COLORS.length] });
   // start with a main line plus 1–2 feature branches already in flight
@@ -286,10 +286,7 @@ function drawGraph(table) {
     dot.setAttribute('stroke', commit.color); dot.setAttribute('stroke-width', merged ? 2 : 0);
     svg.appendChild(dot);
 
-    const td = document.createElement('td');
-    td.className = 'ide-graph';
-    td.appendChild(svg);
-    tr.insertBefore(td, tr.firstChild);
+    place(tr, svg);
     lanes = bottom;
   }
 }
@@ -323,7 +320,16 @@ function disguiseList() {
   const onNotice = /exception_mode=notice/.test(location.search);
   if (onNotice) table.querySelectorAll('tr.ide-pinned').forEach((tr) => tr.classList.remove('ide-pinned'));
 
-  drawGraph(table);
+  const rows = [...table.querySelectorAll('tbody tr')]
+    .filter((tr) => !tr.classList.contains('ide-pinned') && !tr.classList.contains('ide-ad'));
+  if (rows.length && !rows[0].querySelector('td.ide-graph')) {
+    drawGraph(rows, Number(rows[0].dataset.no) || 7, (tr, svg) => {
+      const td = document.createElement('td');
+      td.className = 'ide-graph';
+      td.appendChild(svg);
+      tr.insertBefore(td, tr.firstChild);
+    });
+  }
 
   // tab / button labels
   document.querySelectorAll('.list_array_option button, .list_array_option a, .list_bottom_btnbox button, .list_bottom_btnbox a, .btn_write')
@@ -671,9 +677,104 @@ window.addEventListener('keydown', (e) => {
   if (k !== 'Escape') { e.preventDefault(); e.stopPropagation(); }
 }, true);
 
+// ---- reddit (old.reddit.com r/pathofexile) list → Git Log. Skin: skin/reddit-skin.css
+const isRd = /(^|\.)reddit\.com$/.test(location.hostname);
+const rdHash = (id36) => shortHash(parseInt(id36, 36));
+const rdDate = (iso) => fmtStamp(new Date(iso));
+
+function rdList() {
+  const all = [...document.querySelectorAll('#siteTable > .thing.link')];
+  if (!all.length || /\/comments\//.test(location.pathname)) return;
+  const rows = [];
+  for (const row of all) {
+    if (row.dataset.ide) continue;
+    row.dataset.ide = '1';
+    if (row.dataset.promoted === 'true') { row.remove(); continue; }
+    row.classList.add('ide-rd-row');
+    if (row.classList.contains('stickied')) row.classList.add('ide-pinned'); else rows.push(row);
+
+    const id = (row.dataset.fullname || '').replace(/^t3_/, '');
+    const title = row.querySelector('p.title');
+    const mk = (cls, text, tip) => {
+      const e = document.createElement('span');
+      e.className = cls; e.textContent = text; if (tip) e.title = tip;
+      title.insertBefore(e, title.firstChild);
+    };
+    const flair = row.querySelector('.linkflairlabel');
+    if (flair) flair.classList.add('ide-ref');
+    const dom = row.dataset.domain || '';
+    const xb = row.querySelector('.expando-button');
+    const label = row.dataset.isGallery === 'true' || dom === 'i.redd.it' ? 'assets'
+      : dom === 'v.redd.it' || /^(youtu|(www\.|m\.)?youtube)/.test(dom) || (xb && xb.classList.contains('video')) ? 'media' : '';
+    if (label) mk('ide-ref', label);
+    mk('ide-rd-hash', rdHash(id), id);
+
+    const time = row.querySelector('time[datetime]');
+    if (time) { time.classList.remove('live-timestamp'); time.textContent = rdDate(time.getAttribute('datetime')); }  // page JS rewrites live ones
+    const tag = row.querySelector('.tagline');           // "submitted … by" → just date + author
+    if (tag) for (const n of tag.childNodes) if (n.nodeType === 3) n.nodeValue = '';
+    const c = row.querySelector('a.comments');
+    if (c) c.textContent = `(#${row.dataset.commentsCount || parseInt(c.textContent, 10) || 0})`;
+    const a = row.querySelector('a.title');
+    if (a && row.dataset.permalink) a.setAttribute('href', row.dataset.permalink);
+  }
+
+  // tabs: hot → All commits, top → Starred, plus Pinned
+  const tabs = document.querySelector('#header .tabmenu');
+  if (tabs) {
+    for (const a of tabs.querySelectorAll('a.choice')) {
+      const top = /\/top\/?$/.test(new URL(a.href).pathname);
+      if (top) a.href = a.href.split('?')[0] + '?t=week';
+      a.title = a.textContent.trim();
+      a.textContent = top ? 'Starred' : 'All commits';
+    }
+    const hot = [...tabs.querySelectorAll('a.choice')].find((a) => a.textContent === 'All commits');
+    if (hot) {
+      const li = hot.parentElement.cloneNode(true);
+      li.classList.remove('selected');
+      const pa = li.querySelector('a');
+      pa.href = hot.href.split('#')[0] + '#pinned'; pa.textContent = 'Pinned';
+      tabs.appendChild(li);
+    }
+  }
+  const setMode = () => {
+    const pinned = location.hash === '#pinned';
+    document.documentElement.classList.toggle('ide-rd-pinned-mode', pinned);
+    if (!tabs) return;
+    const lis = [...tabs.querySelectorAll('li')];
+    const pin = lis.find((li) => li.textContent.trim() === 'Pinned');
+    if (!pin) return;
+    if (pinned) lis.forEach((li) => li.classList.remove('selected'));
+    pin.classList.toggle('selected', pinned);
+  };
+  setMode();
+  window.addEventListener('hashchange', setMode);
+
+  const pn = document.querySelector('#header .pagename a');
+  if (pn) {
+    const name = pn.textContent.trim();
+    pn.title = `r/${name}`;
+    pn.textContent = `Log: origin/Rd${name.charAt(0).toUpperCase()}${name.slice(1)}`;
+  }
+  for (const [sel, txt] of [['.next-button a', 'Older ›'], ['.prev-button a', '‹ Newer']]) {
+    const a = document.querySelector(`.nav-buttons .nextprev ${sel}`);
+    if (a) a.textContent = txt;
+  }
+
+  if (rows.length) {
+    drawGraph(rows, parseInt(rows[0].dataset.fullname.replace(/^t3_/, ''), 36), (row, svg) => {
+      const g = document.createElement('div');
+      g.className = 'ide-graph';
+      g.appendChild(svg);
+      row.insertBefore(g, row.firstChild);
+    });
+  }
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   injectSkin();
   watchAlarms();
+  if (isRd) rdList();
   sendMeta();          // must read the real gallery name before disguiseList() renames it
   disguiseList();
   disguiseView();

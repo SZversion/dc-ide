@@ -28,14 +28,22 @@ iframe { color-scheme: dark; }
 .commentarea > form.usertext, .commentarea .usertext-buttons, .reportform,
 .tabmenu li:has(a[href$="/new/"]), .tabmenu li:has(a[href$="/rising/"]),
 .tabmenu li:has(a[href$="/controversial/"]), .tabmenu li:has(a[href*="/wiki/"]),
-.ide-pinned { display: none !important; }
+.ide-rd-row.ide-pinned, html.ide-rd-pinned-mode .ide-rd-row:not(.ide-pinned), .ide-rd-row .domain { display: none !important; }
 
 /* wide layout: the content fills the editor pane */
 .content { margin: 0 !important; padding: 0 16px !important; max-width: none !important; }
 #header { border: 0 !important; background: transparent !important; }
 
 /* classes added by webview-preload.js (rows / commit view) */
-.ide-rd-row { display: flex !important; align-items: center; min-height: 26px; font: 12.5px "Segoe UI", "Malgun Gothic", system-ui, sans-serif !important; }
+html.ide-rd-pinned-mode .ide-rd-row.ide-pinned { display: flex !important; }
+.ide-rd-row .entry { display: flex; align-items: center; gap: 12px; flex: 1; min-width: 0; margin: 0 !important; }
+.ide-rd-row .top-matter { display: contents; }
+.ide-rd-row p.title { flex: 1; min-width: 0; margin: 0 !important; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ide-rd-row .tagline, .ide-rd-row .flat-list { margin: 0 !important; white-space: nowrap; }
+.ide-rd-hash { color: #b3ae60; font: 12px "JetBrains Mono", Consolas, monospace; margin-right: 8px; }
+.ide-rd-row p.title .ide-ref { margin-right: 6px; }
+.tabmenu li.selected a { color: #dfe1e5 !important; border-bottom: 2px solid #3574f0 !important; }
+.ide-rd-row { display: flex !important; align-items: center; height: 26px; box-sizing: border-box; padding: 0 !important; margin: 0 !important; overflow: hidden; font: 12.5px "Segoe UI", "Malgun Gothic", system-ui, sans-serif !important; }
 .ide-rd-row:hover { background-color: #2b2d30 !important; }
 .ide-graph { flex: 0 0 68px; padding: 0 !important; overflow: visible; }
 .ide-graph svg { display: block; }
