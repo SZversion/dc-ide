@@ -34,11 +34,21 @@ function parseGall(url) {
     best: u.searchParams.get('exception_mode') === 'recommend',
   };
 }
+const RD_HOME = 'https://old.reddit.com/r/pathofexile/';   // keep in sync with url-rules.js
+function parseRd(url) {
+  let u; try { u = new URL(url); } catch { return null; }
+  if (u.hostname !== 'old.reddit.com' || !/^\/r\/pathofexile(\/|$)/i.test(u.pathname)) return null;
+  const m = u.pathname.match(/\/comments\/(\w+)/);
+  return { page: m ? 'view' : 'lists', id: m ? m[1] : null, best: /\/top\/?$/i.test(u.pathname), pinned: u.hash === '#pinned' };
+}
 const gallUrl = (g, page = 'lists', extra = '') =>
   `https://gall.dcinside.com/${KIND_PREFIX[g.kind] || ''}board/${page}/?id=${encodeURIComponent(g.id)}${extra}`;
 const pascal = (s) => s.replace(/(^|[_\-\s.]+)(\w)/g, (_, __, c) => c.toUpperCase()).replace(/[^\w]/g, '');
 
 function fileNameFor(url) {
+  const rd = parseRd(url);
+  if (rd) return rd.page === 'view' ? `RdPathofexileEntity${rd.id}.java` : `RdPathofexile${rd.best ? 'QueryDsl' : 'Repository'}.java`;
+  if (/^https:\/\/(www|old)\.reddit\.com\/login/.test(url)) return 'AuthFilter.java';
   const g = parseGall(url);
   if (g) {
     const base = pascal(g.id);
@@ -104,8 +114,8 @@ function newTab(url = HOME, activate = true) {
 function renameTab(tab) {
   tab.name = fileNameFor(tab.url);
   tab.el.querySelector('.name').textContent = tab.name;
-  const g = parseGall(tab.url);
-  tab.el.querySelector('.ico').textContent = g && g.page === 'view' ? 'E' : g && g.page === 'write' ? 'R' : 'C';
+  const g = parseGall(tab.url), rd = parseRd(tab.url);
+  tab.el.querySelector('.ico').textContent = rd ? (rd.page === 'view' ? 'E' : 'C') : g && g.page === 'view' ? 'E' : g && g.page === 'write' ? 'R' : 'C';
 }
 
 function activateTab(tab) {
@@ -136,7 +146,7 @@ function syncChrome() {
   window.ide.setTitle(`workspace – ${name}`);
   $('#addr').value = boss ? '' : active.url;
   const g = parseGall(active.url);
-  const pkg = g ? `modules › ${pascal(g.id).toLowerCase()}` : 'app';
+  const pkg = g ? `modules › ${pascal(g.id).toLowerCase()}` : parseRd(active.url) ? 'modules › rdpathofexile' : 'app';
   $('#breadcrumbs').innerHTML = `workspace › src › main › java › com › workspace › ${pkg} › <b>${escapeHtml(name)}</b>`;
   $('#sb-path').textContent = `workspace › ${pkg.replace(/ › /g, '/')}/${name}`;
   $('#sb-loading').hidden = !active.el.classList.contains('loading');
@@ -212,6 +222,7 @@ function renderTree() {
   tree.innerHTML = '';
   const cur = active && parseGall(active.url);
   const add = (depth, o) => tree.appendChild(node(depth, o));
+  const rd = active && parseRd(active.url);
   const dir = (key, depth, label, children, extra = {}) => {
     const open = expanded.has(key);
     add(depth, { label, ico: '▰', icoClass: 'dir', expandable: true, open, onToggle: () => toggleExpand(key), ...extra });
@@ -237,6 +248,17 @@ function renderTree() {
     dir('idea', d1, '.idea', () => {});
     dir('src', d1, 'src/main/java', (d2) => {
       dir('modules', d2, 'com.workspace.modules', (d3) => {
+        const rdSel = rd && rd.page === 'lists';
+        add(d3, {
+          label: 'RdPathofexileRepository.java', ico: 'C', icoClass: 'java', expandable: true, open: expanded.has('rd:pathofexile'),
+          selected: rdSel && !rd.best && !rd.pinned, tooltip: 'r/pathofexile',
+          onToggle: () => toggleExpand('rd:pathofexile'), onOpen: (nt) => open(RD_HOME, nt),
+        });
+        if (expanded.has('rd:pathofexile')) {
+          add(d3 + 1, { label: 'findAll()', ico: 'm', icoClass: 'cls', selected: rdSel && !rd.best && !rd.pinned, onOpen: (nt) => open(RD_HOME, nt) });
+          add(d3 + 1, { label: 'findRecommended()', ico: 'm', icoClass: 'cls', selected: rdSel && rd.best, onOpen: (nt) => open(RD_HOME + 'top/?t=week', nt) });
+          add(d3 + 1, { label: 'findPinned()', ico: 'm', icoClass: 'cls', selected: rdSel && rd.pinned, onOpen: (nt) => open(RD_HOME + '#pinned', nt) });
+        }
         if (!galleries.length) add(d3, { label: '(Ctrl+N or Shift×2 to find a gallery)', ico: '' });
         galleries.forEach((g) => gallNode(g, d3, true));
       });
@@ -251,6 +273,7 @@ function renderTree() {
   dir('ext', 0, 'External Libraries', (d1) => {
     add(d1, { label: '< JDK 21 >', ico: '▣', icoClass: 'dir' });
     add(d1, { label: 'Gallog: profile-config', ico: '▣', icoClass: 'dir', tooltip: '갤로그', onOpen: (nt) => open('https://gallog.dcinside.com/', nt) });
+    add(d1, { label: 'Auth: rd-session-config', ico: '▣', icoClass: 'dir', tooltip: '로그인', onOpen: (nt) => open('https://www.reddit.com/login/?dest=' + encodeURIComponent(RD_HOME), nt) });
     add(d1, {
       label: 'Auth: session-config', ico: '▣', icoClass: 'dir', tooltip: '로그인',
       onOpen: (nt) => {
