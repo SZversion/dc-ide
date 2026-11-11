@@ -470,15 +470,8 @@ function disguiseView() {
 }
 
 // ---- 4d. login page → IDE "GitLab 계정" dialog
-// Re-arranges the real form controls (same inputs, same submit) inside an IDE-style dialog.
-function disguiseLogin() {
-  if (!/sign\.dcinside\.com$/.test(location.hostname) || !/^\/login/.test(location.pathname)) return;
-  const form = document.querySelector('form[name="login"]');
-  const id = document.getElementById('id');
-  const pw = document.getElementById('pw');
-  const submit = form && form.querySelector('button[type="submit"]');
-  if (!form || !id || !pw || !submit || form.querySelector('.ide-dialog')) return;
-
+// Dialog shell shared by dc and reddit; callers fill the data-slot elements (id, pw, save, sso, buttons).
+function buildLoginDialog({ onCancel, onGenerate }) {
   const dlg = document.createElement('div');
   dlg.className = 'ide-dialog';
   dlg.innerHTML = `
@@ -495,8 +488,32 @@ function disguiseLogin() {
       <div></div>
       <div class="ide-dlg-field" data-slot="save"></div>
     </div>
+    <div data-slot="sso"></div>
     <div class="ide-dlg-footer" data-slot="buttons"><button type="button" class="ide-dlg-btn ide-dlg-cancel">취소</button></div>`;
+  dlg.querySelector('.ide-dlg-cancel').addEventListener('click', onCancel);
+  dlg.querySelector('.ide-dlg-x').addEventListener('click', onCancel);
+  dlg.querySelector('.ide-dlg-gen').addEventListener('click', onGenerate);
+  dlg.querySelector('.ide-dlg-gen').title = '비밀번호 찾기';
+  return dlg;
+}
 
+// Re-arranges the real form controls (same inputs, same submit) inside an IDE-style dialog.
+function disguiseLogin() {
+  if (!/sign\.dcinside\.com$/.test(location.hostname) || !/^\/login/.test(location.pathname)) return;
+  const form = document.querySelector('form[name="login"]');
+  const id = document.getElementById('id');
+  const pw = document.getElementById('pw');
+  const submit = form && form.querySelector('button[type="submit"]');
+  if (!form || !id || !pw || !submit || form.querySelector('.ide-dialog')) return;
+
+  const leave = () => {
+    const back = new URLSearchParams(location.search).get('s_url');
+    let u = 'https://gall.dcinside.com/';
+    try { if (back && /^https:\/\/([a-z0-9-]+\.)*dcinside\.com\//.test(decodeURIComponent(back))) u = decodeURIComponent(back); } catch { /* keep default */ }
+    location.href = u;
+  };
+  // "생성..." → 비밀번호 찾기 (only account-recovery link kept)
+  const dlg = buildLoginDialog({ onCancel: leave, onGenerate: () => { location.href = 'https://sign.dcinside.com/myinfo/reset_pwd'; } });
   const slot = (n) => dlg.querySelector(`[data-slot="${n}"]`);
   id.placeholder = '';
   pw.placeholder = '';
@@ -511,18 +528,6 @@ function disguiseLogin() {
   submit.textContent = '로그인';
   submit.className = 'ide-dlg-btn ide-dlg-primary';
   slot('buttons').insertBefore(submit, slot('buttons').firstChild);
-
-  const leave = () => {
-    const back = new URLSearchParams(location.search).get('s_url');
-    let u = 'https://gall.dcinside.com/';
-    try { if (back && /^https:\/\/([a-z0-9-]+\.)*dcinside\.com\//.test(decodeURIComponent(back))) u = decodeURIComponent(back); } catch { /* keep default */ }
-    location.href = u;
-  };
-  dlg.querySelector('.ide-dlg-cancel').addEventListener('click', leave);
-  dlg.querySelector('.ide-dlg-x').addEventListener('click', leave);
-  // "생성..." → 비밀번호 찾기 (only account-recovery link kept)
-  dlg.querySelector('.ide-dlg-gen').addEventListener('click', () => { location.href = 'https://sign.dcinside.com/myinfo/reset_pwd'; });
-  dlg.querySelector('.ide-dlg-gen').title = '비밀번호 찾기';
 
   form.insertBefore(dlg, form.querySelector('fieldset') || form.firstChild);
   document.documentElement.classList.add('ide-login');
@@ -850,10 +855,83 @@ function rdComments() {
   area.querySelectorAll('.morecomments a.button').forEach((b) => relabel(b, { 'load more comments': 'Load more…' }));
 }
 
+// reddit sign-in (new-reddit markup) → same dialog. Its own inputs collect the values; on submit they are
+// copied into reddit's shadow-DOM inputs and reddit's own 로그인 button is clicked.
+function rdLogin() {
+  if (!/^\/login/.test(location.pathname)) return;
+  const find = () => {
+    const login = document.querySelector('auth-flow-login');
+    const btn = login && [...login.querySelectorAll('button')].find((b) => /^(로그인|Log In)$/i.test(b.textContent.trim()));
+    const user = document.querySelector('faceplate-text-input#login-username')?.shadowRoot?.querySelector('input');
+    const pass = document.querySelector('faceplate-text-input#login-password')?.shadowRoot?.querySelector('input');
+    const mgr = document.querySelector('auth-flow-manager');
+    return btn && user && pass && mgr ? { btn, user, pass, mgr } : null;
+  };
+  // faceplate components hydrate after DOMContentLoaded and their shadow roots are not seen by a document
+  // MutationObserver, so poll; give up after 10 s and leave reddit's own screen.
+  const t0 = Date.now();
+  const timer = setInterval(() => {
+    const els = find();
+    if (!els && Date.now() - t0 < 10000) return;
+    clearInterval(timer);
+    if (els) build(els.mgr);
+  }, 200);
+
+  function build(mgr) {
+    const dest = new URLSearchParams(location.search).get('dest');
+    const dlg = buildLoginDialog({
+      onCancel: () => { location.href = /^https:\/\/old\.reddit\.com\//.test(dest || '') ? dest : 'https://old.reddit.com/r/pathofexile/'; },
+      onGenerate: () => { location.href = 'https://www.reddit.com/password'; },
+    });
+    const slot = (n) => dlg.querySelector(`[data-slot="${n}"]`);
+    const id = Object.assign(document.createElement('input'), { type: 'text', id: 'id', autocomplete: 'username' });
+    const pw = Object.assign(document.createElement('input'), { type: 'password', id: 'pw', autocomplete: 'current-password' });
+    slot('id').appendChild(id);
+    slot('pw').insertBefore(pw, slot('pw').firstChild);
+    const sso = document.querySelector('auth-flow-sso-buttons');
+    if (sso) slot('sso').appendChild(sso);
+    const submit = Object.assign(document.createElement('button'), { type: 'button', className: 'ide-dlg-btn ide-dlg-primary', textContent: '로그인' });
+    slot('buttons').insertBefore(submit, slot('buttons').firstChild);
+
+    const setValue = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set;
+    const send = () => {
+      const els = find();
+      if (!els) return;
+      for (const [input, v] of [[els.user, id.value], [els.pass, pw.value]]) {
+        setValue.call(input, v);
+        for (const t of ['input', 'change']) input.dispatchEvent(new Event(t, { bubbles: true, composed: true }));
+      }
+      // reddit validates (debounced) and only then enables its button; give up after 3 s like a disabled click
+      const t1 = Date.now();
+      const go = () => {
+        const b = find()?.btn;
+        if (b && !b.disabled) b.click();
+        else if (Date.now() - t1 < 3000) setTimeout(go, 50);
+      };
+      go();
+    };
+    submit.addEventListener('click', send);
+    dlg.addEventListener('keydown', (e) => { if (e.key === 'Enter' && e.target.tagName === 'INPUT') send(); });
+
+    document.body.appendChild(dlg);
+    document.title = 'GitLab 계정 로그인';
+    // captcha / 2FA / email-code steps: hide the dialog and show reddit's own screen
+    const sync = () => {
+      const on = mgr.getAttribute('step-name') === 'login';
+      dlg.hidden = !on;
+      document.documentElement.classList.toggle('ide-rd-login', on);
+    };
+    sync();
+    new MutationObserver(sync).observe(mgr, { attributes: true, attributeFilter: ['step-name'] });
+    setTimeout(() => id.focus(), 50);
+  }
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   injectSkin();
   watchAlarms();
   if (isRd) {
+    rdLogin();
     rdList(); rdView(); rdComments();
     const ca = document.querySelector('.commentarea');
     if (ca) {
