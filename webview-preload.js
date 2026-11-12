@@ -35,7 +35,9 @@ img, video, .write_div iframe, .img_box, .thumb_img {
   opacity: .1 !important; filter: grayscale(1) !important; transition: opacity .15s, filter .15s !important; }
 img:hover, video:hover, .write_div iframe:hover, a:hover img, .img_box:hover, .thumb_img:hover {
   opacity: 1 !important; filter: none !important; }
-.sp_img img, .icon_img img, img[width="12"], img[width="14"], img[height="12"], img.written_dccon:hover { opacity: .8 !important; }`;
+.sp_img img, .icon_img img, img[width="12"], img[width="14"], img[height="12"], img.written_dccon:hover { opacity: .8 !important; }
+/* captcha code images must stay readable (comment / post / recommend forms) */
+img.kcaptcha, .kap_codeimg img, [id^="kcaptcha"] { opacity: 1 !important; filter: none !important; }`;
 let settings = null;
 // settings.media: 'dim' (dim everything) | 'fold' (fold post media + dccons, dim the rest) | 'raw' (as is)
 function applySettings() {
